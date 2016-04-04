@@ -1,11 +1,17 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Db.Postgre where
 
 import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.ToField (toField)  
+
 import Control.Monad
 import Control.Applicative
 import qualified Data.ByteString.Char8 as BS8 (pack)
+import qualified Data.Configurator     as C
+import qualified Data.Text             as T
 import GHC.Int (Int64)
-import Database.PostgreSQL.Simple.ToField (toField)  
+
 
 -- connString :: BS8.ByteString
 connString = BS8.pack $ unwords [ "host='localhost'"
@@ -14,6 +20,26 @@ connString = BS8.pack $ unwords [ "host='localhost'"
                         , " user='postgres'"
                         , " password='welcome'"
                         ]
+
+data DbConfig = DbConfig
+             { host     :: T.Text
+             , port     :: Int
+             , dbname   :: T.Text
+             , password :: T.Text
+             }
+
+-- TODO: create postgre   PostgreSQLPool
+-- connString = parseConfig "postgresql.config"
+
+parseConfig :: FilePath -> IO DbConfig
+parseConfig configFile =
+    do config <- C.load [C.Required configFile]
+       host <- C.require config "host"
+       port <- C.require config "port"
+       user <- C.require config "user"
+       password <- C.require config "password"
+       return (DbConfig host port user password)
+
 
 testPg :: Int -> Int -> IO Int
 testPg a b = do

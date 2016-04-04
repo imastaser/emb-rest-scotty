@@ -13,5 +13,7 @@ executable          emb-rest
                   , scotty >= 0.10.2 && < 0.11
                   , aeson  >= 0.6    && < 0.12
                   , postgresql-simple >= 0.5.1.2 && < 0.6
+                  , configurator      >=0.3
+                  , text              >=1.2
                   , bytestring 
 
