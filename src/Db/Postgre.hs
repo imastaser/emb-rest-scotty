@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Db.Postgre where
+module DB.Postgre
+  (connString)
+ where
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField (toField)  
