@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module DB.Core where
+module DB.Core
+      ()
+      where
 
 import        DB.Postgre (connString)    
 import        Data.Pool
-import        Database.PostgreSQL.Simple (connectPostgreSQL)
-
+import        Database.PostgreSQL.Simple (connectPostgreSQL, close, Connection)
+import        Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 
 
 -- |"Striped" means that a single 'Pool' consists of several
@@ -28,8 +30,9 @@ data Environment
    | Test
    deriving (Eq, Read, Show)
 
-getPool :: Environment -> IO (Pool Connection)
-getPool e = do
+
+-- getPool :: Environment -> IO (Pool Connection)
+{--getPool e = do
    -- s <- getConnectionString e
    let s = connString
    let n = getConnectionSize e
@@ -37,9 +40,15 @@ getPool e = do
      Development -> runStdoutLoggingT (mkPool s n)
      Production  -> runStdoutLoggingT (mkPool s n)
      Test        -> runNoLoggingT     (mkPool s n)
+--}
 
 
 
-
-mkPool :: Int -> IO (Pool Connection)
+-- mkPool :: String -> Int -> IO (Pool Connection)
 mkPool s n = createPool (connectPostgreSQL s) close 1 20 n
+
+
+getConnectionSize :: Environment -> Int
+getConnectionSize Development = 1
+getConnectionSize Production = 8
+getConnectionSize Test = 1

@@ -4,6 +4,6 @@ module Entity (module X) where
 
 import Entity.User             as X
 
-import Db.Postgre              as X
---import Cis194.Hw01             as X
---import Cis194.Hw02_LogAnalysis as X
+import DB.Postgre              as X
+import DB.Migrate              as X
+import DB.Core                 as X 

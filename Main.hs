@@ -3,9 +3,11 @@
 
 import Entity
 import Web.Scotty
-import Data.Monoid ((<>))
-
--- import qualified Data.Text.Internal.Lazy as L
+import Web.Scotty.Internal.Types 
+--import Data.Monoid ((<>))
+--import Prelude
+    
+import qualified Data.Text.Internal.Lazy as L
 
 
 
@@ -17,6 +19,8 @@ main = scotty 3131 $ do
     -- get "/testpg" $ text ( testPg)
 -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
 -- wordR :: L.Text -> ActionM ()
+
+wordR ::L.Text -> ActionT L.Text IO ()
 wordR w = do
     word <- param w
     html $ mconcat ["<h1>Scotty, ", word, " me up!</h1>"]
