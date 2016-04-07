@@ -7,7 +7,7 @@ build-type:    Simple
 executable          emb-rest
     hs-source-dirs: ., src
     main-is:        Main.hs
-    ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
+    ghc-options:    -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:     OverloadedStrings
     build-depends:  base   >= 4      && < 5
                   , scotty >= 0.10.2 && < 0.11

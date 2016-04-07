@@ -4,10 +4,12 @@ module DB.Core
       ()
       where
 
+import Emb.Types (Environment(..), DbConfig(..))
+
 import        DB.Postgre (connString)    
 import        Data.Pool
 import        Database.PostgreSQL.Simple (connectPostgreSQL, close, Connection)
-import        Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
+
 
 
 -- |"Striped" means that a single 'Pool' consists of several
@@ -24,11 +26,9 @@ import        Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 -- 20                     - max keep alive (s)
 -- 10                     - max connection, a good baseline is two times the number of cores 
 
-data Environment
-   = Development
-   | Production
-   | Test
-   deriving (Eq, Read, Show)
+
+
+
 
 
 -- getPool :: Environment -> IO (Pool Connection)

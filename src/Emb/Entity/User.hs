@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Entity.User where
+module Emb.Entity.User where
     
 import GHC.Generics
 import Data.Aeson (FromJSON, ToJSON)  
