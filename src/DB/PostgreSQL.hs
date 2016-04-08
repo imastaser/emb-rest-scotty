@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module DB.Postgre where
+module DB.PostgreSQL where
 
 
 import Emb.Types (Environment(..), DbConfig(..))
@@ -8,6 +8,7 @@ import Emb.Types (Environment(..), DbConfig(..))
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField (toField)  
 
+import Data.Pool(Pool, createPool, withResource)
 
 
 import Control.Monad
@@ -19,8 +20,8 @@ import qualified Data.Text             as T
 import GHC.Int (Int64)
 
 
-
 -- connString :: BS8.ByteString
+-- connString :: Data.ByteString.Internal.ByteString
 connString = BS8.pack $ unwords [ "host='localhost'"
                         , " port=5432"
                         , " dbname='test'"
@@ -28,7 +29,7 @@ connString = BS8.pack $ unwords [ "host='localhost'"
                         , " password='Welcome*99'"
                         ]
 
-
+-- | parse postgresql.config and make DbConfig for given environment
 parseConfig :: Environment -> FilePath -> IO DbConfig
 parseConfig e configFile =
     do config   <- C.load [C.Required configFile]
@@ -37,15 +38,26 @@ parseConfig e configFile =
        database <- C.require config "database" :: IO T.Text
        user     <- C.require config "user"
        password <- C.require config "password"
+       maxAlive <- C.require config "maxalive"
+       stripes  <- C.require config "stripes"
        let (dbEnv, n) = case e of
-                            Development -> ("_development", 1)
-                            Production  -> ("_production", 8)
-                            Test        -> ("_test", 1)
-       return $ mkDbConfig host port (T.append database dbEnv) user password n
+                          Development -> ("_development", 1)
+                          Production  -> ("_production", 8)
+                          Test        -> ("_test", 1)
+       return $ DbConfig
+                  {
+                    dbHost        = host
+                  , dbPort        = port
+                  , dbName        = (T.append database dbEnv)
+                  , dbUser        = user
+                  , dbPassword    = password
+                  , dbStripes     = stripes
+                  , dbMaxAlive    = maxAlive
+                  , dbConnections = n 
+                }
 
-mkDbConfig = DbConfig
-
-
+-- | create postgresql connection from DbConfig
+-- It is needed to use with resource pool
 newConn :: DbConfig -> IO Connection
 newConn conf = connect defaultConnectInfo
                        { connectHost     = T.unpack $ dbHost conf
@@ -54,6 +66,13 @@ newConn conf = connect defaultConnectInfo
                        , connectUser     = T.unpack $ dbUser conf
                        , connectPassword = T.unpack $ dbPassword conf
                        }
+
+-- | create connection pool
+mkPool :: DbConfig -> IO (Pool Connection)
+mkPool cfg = createPool (newConn cfg) close (dbStripes cfg) 40 (dbConnections cfg)
+
+
+
 
 testPg :: Int -> Int -> IO Int
 testPg a b = do

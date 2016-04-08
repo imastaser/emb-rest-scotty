@@ -14,6 +14,7 @@ data Environment
 
 
 
+-- | DbConfig contains info needed to connect to PostgreSQL server
 data DbConfig = DbConfig
              { dbHost        :: T.Text
              , dbPort        :: Int
@@ -21,6 +22,8 @@ data DbConfig = DbConfig
              , dbUser        :: T.Text
              , dbPassword    :: T.Text
              , dbConnections :: Int
-             
+             , dbStripes     :: Int -- - stripes, a single stripe is fine for many applications 
+             , dbMaxAlive    :: Int -- - max keep alive (s)
+
              }   
     deriving (Show) 

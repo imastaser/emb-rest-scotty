@@ -58,9 +58,10 @@ runDb :: Pool Connection -> (Connection -> IO a) -> IO a
 runDb pool f =
   withResource pool (\conn -> withTransaction conn (f conn))
 
-mkPool :: String -> IO (Pool Connection)
+{--mkPool :: String -> IO (Pool Connection)
 mkPool cfg =
   createPool (connectPostgreSQL . C8.pack $ cfg) close 1 20 10
+  --}
 
 
 migrations :: [(Int, Query)]
@@ -68,3 +69,38 @@ migrations = [
     (1, "CREATE TABLE library (id integer NOT NULL PRIMARY KEY, name character varying NOT NULL)")
   , (2, "CREATE TABLE build_number (id integer NOT NULL PRIMARY KEY, library integer NOT NULL, version character varying NOT NULL, build integer NOT NULL default -1)")
   ]
+
+
+  -------------------------------------------------------------------------------
+-- Queries
+-------------------------------------------------------------------------------
+
+ -- [sql|CREATE TABLE IF NOT EXISTS migration_info (migration INT PRIMARY KEY)|]
+bootstrapQ :: Query
+bootstrapQ = [sql|
+CREATE TABLE IF NOT EXISTS schema_migration (
+    id              serial      NOT NULL,
+    name            text        NOT NULL,
+    description     text,
+    time            timestamptz NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id),
+    UNIQUE (name)
+);
+|]
+
+
+-- getMigrations :: Connection -> IO [ChangeHistory]
+getMigrations conn = query_ conn migrationsQ
+
+migrationsQ :: Query
+migrationsQ =
+  "SELECT id, name, description, time FROM schema_migration ORDER BY id;"
+
+
+runMigration1 :: Connection -> (Int, Query) -> IO ()
+runMigration1 c (v, q) = do
+  e <- exists c [sql| SELECT TRUE FROM migration_info WHERE migration = ? |] (Only v)
+  unless e $ do
+     void $ execute c [sql| INSERT INTO migration_info (migration) VALUES (?) |] (Only v)
+     void $ execute_ c q
