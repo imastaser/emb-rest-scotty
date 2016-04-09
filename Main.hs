@@ -22,11 +22,9 @@ main = do
     let logO = case env of
                 Development -> logStdoutDev
                 Production  -> logStdout
-    
-    pool1 <- metaPool
-    mkDB pool1
-    conf <- parseConfig env "postgresql.config"
-    pool <- mkPool conf 
+    cfg <- parseConfig env "postgresql.config"
+    mkDB cfg -- creating db if not exists, do not need pool
+    pool <- mkPool  cfg 
     migrate1 pool
     scotty 3131 $ do
     middleware logO 

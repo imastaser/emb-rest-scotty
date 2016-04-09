@@ -1,9 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
--- Non type-variable argument in the constraint: FromRow (Only b)  (Use FlexibleContexts to permit this)
+-- Non type-variable argument in the constraint: 
+-- FromRow (Only b)  (Use FlexibleContexts to permit this)
 {-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 
-module Migrate.PostgreSQL (migrate1, metaPool, mkDB) where
+
+
+module Migrate.PostgreSQL (migrate1, mkDB) where
+
+import Emb.Types
 
 import Data.Pool
 import Data.Maybe
@@ -11,10 +17,44 @@ import Control.Monad (void, unless, forM_)
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.SqlQQ
+import Database.PostgreSQL.Simple.Types
+
+import Database.PostgreSQL.Simple.FromRow
+import Database.PostgreSQL.Simple.ToRow
+import Database.PostgreSQL.Simple.ToField
+import Data.String(fromString)
+
+import qualified Data.Text as T
+
 
 -- void $ execute_  c createDBQ  -- (Only "embroidery_development" :: Only String)
-mkDB pool = withResource pool createDB
-                where createDB conn = execute_  conn createDBQ
+
+mkDB cfg  = do 
+    conn <- connect defaultConnectInfo
+                       { 
+                         connectUser     = T.unpack $ dbUser cfg
+                       , connectPassword = T.unpack $ dbPassword cfg
+                       }
+    xs :: [Report] <- query conn 
+                      [sql| SELECT datname FROM pg_database 
+                            WHERE datname = ? 
+                      |] (Only (dbName cfg))
+    unless (not . null $ xs) $ do 
+        void $ execute_ conn (
+          fromString $
+                        "CREATE DATABASE " ++ (T.unpack $ dbName cfg) ++
+                        " WITH OWNER = postgres   \
+                        \  ENCODING = 'UTF8'      \
+                        \ TABLESPACE = pg_default \
+                        \ CONNECTION LIMIT = -1;"
+                      )
+
+        -- createDBQ (Only (dbName cfg))
+   
+{--mkDB pool = withResource pool createDB
+               where createDB conn = execute_  conn createDBQ
+--}
+       
 
 
 migrate1 :: Pool Connection -> IO ()
@@ -80,32 +120,12 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 
 createDBQ :: Query
 createDBQ = [sql|
-CREATE DATABASE embroidery_development
+CREATE DATABASE =?
   WITH OWNER = postgres
        ENCODING = 'UTF8'
        TABLESPACE = pg_default
-       LC_COLLATE = 'English_United States.1252'
-       LC_CTYPE = 'English_United States.1252'
        CONNECTION LIMIT = -1;
 |]
-
-createDBQ' :: Query
-createDBQ' = [sql|
-DO
-$do$
-BEGIN
-
-IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'embroidery_development') THEN
-   RAISE NOTICE 'Database already exists'; 
-ELSE
-   PERFORM dblink_exec('dbname=' || current_database()  -- current db
-                     , 'CREATE DATABASE embroidery_development');
-END IF;
-
-END
-$do$
-|]
-
 
 personQ :: Query
 personQ = [sql|
@@ -132,28 +152,83 @@ CREATE TABLE IF NOT EXISTS product (
 |]
 
 
-
-
-
 migrationsQ :: Query
 migrationsQ =
   "SELECT id, name, description, time FROM schema_migration ORDER BY id;"
 
-hello :: IO Int
-hello = do
+data Report = Report { datname :: T.Text} deriving (Show)
+
+instance FromRow Report where
+  fromRow = Report <$> field 
+
+instance ToRow Report where
+  toRow d = [toField (datname d)]
+
+instance ToField Report where
+  toField d = toField (datname d)   
+
+hello :: (ToField Report, FromRow Report) => String ->  IO [Report]
+hello dbname = do
   pool <- createPool (connect defaultConnectInfo
                        { 
                          connectUser     = "postgres"
                        , connectPassword = "Welcome*99"
                        }) close 1 40 10
-  runDb pool $ \conn -> do
-  -- void $ execute_ 
-  [Only i] <- query_ conn "select 2 + 2"
-  return i
+  -- [Only k] :: [Only Int]
+  -- xs <- withResource pool $
+  conn <- connect defaultConnectInfo
+                       { 
+                         connectUser     = "postgres"
+                       , connectPassword = "Welcome*99"
+                       }
 
+ -- execute_ conn ((fromString ("CREATE DATABASE " ++ "dbname")) :: Query)                    
+  
+  execute_ conn (
+          fromString $
+                        "CREATE DATABASE " ++ dbname ++
+                        " WITH OWNER = postgres \
+                        \ TABLESPACE = pg_default \
+                        \ CONNECTION LIMIT = -1;"
+                      )
+
+  query conn [sql| SELECT datname FROM pg_database 
+                    WHERE datname = ? 
+                  |] (Only "test" :: Only T.Text)
+
+
+newtype TEST = TEST {nname :: T.Text} deriving (Show)
+  
+
+                                      
+  -- query_ conn  ifdbExistsQ 
+  --xs <- query_ conn ifdbExistsQ
+  --forM_ xs $ \(name) ->
+   -- putStrLn  name 
+  -- runDb pool $ \conn -> do
+  -- void $ execute_ 
+  -- [Only i] <- query_ conn "select 2 + 2"
+  --return xs
+  
+{--
+mkDB pool = do 
+      [Only i] :: [Only Int] <- withResource pool ka 
+      unless (i == 0) $ do 
+        void $ withResource pool createDB
+  where
+   createDB conn = execute_  conn createDBQ'
+
+ka conn       = query_ conn  ifdbExistsQ
+
+
+--}
 
 metaPool = createPool (connect defaultConnectInfo
                        { 
                          connectUser     = "postgres"
                        , connectPassword = "Welcome*99"
                        }) close 1 40 10
+
+
+sqlee =error "Database.PostgreSQL.Simple.SqlQQ.sql:\
+                        \ quasiquoter used in type context"
