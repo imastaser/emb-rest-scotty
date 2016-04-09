@@ -1,0 +1,27 @@
+Default: &defaults
+  port: 5432
+  user: postgres
+  password: Welcome*99
+  host: localhost
+  database: embroidery
+  connections: 10
+  stripes: 1
+  maxalive: 20
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: embroidery_test
+  <<: *defaults
+
+Staging:
+  database: embroidery_staging
+  connections: 100
+  <<: *defaults
+
+Production:
+  database: embroidery_production
+  connections: 100
+  host: localhost
+  <<: *defaults

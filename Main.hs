@@ -18,7 +18,9 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 main :: IO ()
 main = do
     -- TODO: get environemtn from command line
-    let env  = Development
+    argCfg <- parseArgConfig
+
+    let env  = environment argCfg
     let logO = case env of
                 Development -> logStdoutDev
                 Testing     -> logStdoutDev
@@ -28,7 +30,7 @@ main = do
     mkDB cfg -- creating db if not exists, do not need pool
     pool <- mkPool  cfg 
     migrate1 pool
-    scotty 3131 $ do
+    scotty (port argCfg) $ do
     middleware logO 
 
     get "/word/:word" $ wordR "word"

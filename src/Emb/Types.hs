@@ -13,6 +13,12 @@ data DefaultEnv = Development
                 | Production deriving (Read, Show, Enum, Bounded)
 
 
+-- | Setup commandline arguments for environment and port
+data ArgConfig = ArgConfig
+    { environment :: DefaultEnv
+    , port        :: Int
+    } deriving Show
+
 
 -- | DbConfig contains info needed to connect to PostgreSQL server
 data DbConfig = DbConfig

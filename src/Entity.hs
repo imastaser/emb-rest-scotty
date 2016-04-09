@@ -9,3 +9,5 @@ import DB.Migrate      as X
 -- import DB.Core         as X 
 
 import Migrate.PostgreSQL as X
+
+import Init.Config as X

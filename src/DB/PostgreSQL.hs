@@ -45,7 +45,7 @@ parseConfig e configFile =
        let (dbEnv, n) = case e of
                           Development -> ("_development", 1)
                           Production  -> ("_production", 8)
-                          Staging     -> ("_production", 8)
+                          Staging     -> ("_staging", 8)
                           Testing     -> ("_test", 1)
        return $ DbConfig
                   {

@@ -19,4 +19,5 @@ executable          emb-rest
                   -- logStdout
                   , wai-extra         >=3.0.7    
                   , bytestring 
+                  , yaml
 
