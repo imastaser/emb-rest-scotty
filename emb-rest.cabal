@@ -17,7 +17,8 @@ executable          emb-rest
                   , text              >=1.2
                   , resource-pool     >=0.2.3.2
                   -- logStdout
-                  , wai-extra         >=3.0.7    
+                  , wai-extra         >=3.0.7   
+                  , transformers 
                   , bytestring 
                   , yaml
 

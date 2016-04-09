@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS person (
     id              serial      NOT NULL,
     firstName       text        NOT NULL,
     lastName        text        NULL,
+    email           text        NULL,
     time            timestamptz NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
@@ -143,6 +144,7 @@ productQ :: Query
 productQ = [sql|
 CREATE TABLE IF NOT EXISTS product (
     id              serial NOT NULL,
+    person_id       serial NOT NULL,
     name            text   NOT NULL,
     price           text   NULL,
     time            timestamptz NOT NULL DEFAULT now(),

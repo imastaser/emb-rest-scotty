@@ -11,3 +11,8 @@ import DB.Migrate      as X
 import Migrate.PostgreSQL as X
 
 import Init.Config as X
+
+import Emb.Entity.Product as X
+import Emb.Entity.Person  as X
+import DB.Dao as X
+

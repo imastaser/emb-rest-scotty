@@ -12,6 +12,12 @@ import Data.Maybe (fromMaybe)
 import System.Exit (exitFailure)
 import Data.Char (toUpper)
 
+-- TODO: read config from yml files
+-- http://lenguyenthedat.blogspot.am/2014/01/parsing-config-file-in-haskell-with-yaml.html
+-- https://stackoverflow.com/questions/21292428/reading-yaml-lists-of-objects-in-haskell
+-- http://blog.ssanj.net/posts/2014-10-09-How-to-read-a-YAML-file-from-Haskell.html
+-- https://github.com/chrisdone/lpaste/blob/a7bb100480c666c21dab8957bfefd2ada7411ab3/src/Hpaste/Config.hs
+
 data AppConfig environment = AppConfig
     { appEnv   :: environment
     , appPort  :: Int
@@ -19,6 +25,7 @@ data AppConfig environment = AppConfig
     , appHost  :: T.Text
     } deriving (Show)  
 
+-- https://github.com/yesodweb/yesod/blob/e7c6d06d3dca7710b6bad2caa074162170b82a78/yesod/Yesod/Default/Config.hs
 
 parseArgConfig :: IO ArgConfig
 parseArgConfig = do

@@ -5,12 +5,16 @@ import Entity
 import Web.Scotty
 import Web.Scotty.Internal.Types 
 
-
+import qualified Data.Aeson as A
 --import Data.Monoid ((<>))
 --import Prelude
     
 import qualified Data.Text.Internal.Lazy as L
 import Database.PostgreSQL.Simple
+
+import qualified Data.Text.Lazy as TL
+
+
 
 import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 
@@ -36,6 +40,10 @@ main = do
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
+    post "/person" $ do person <- getPersonParam -- read the request body, try to parse it into article
+                        insertPerson pool person -- insert the parsed article into the DB
+                        createdPerson person     -- show info that the article was created
+
     -- get "/testpg" $ text ( testPg)
     -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
     -- wordR :: L.Text -> ActionM ()
@@ -53,3 +61,16 @@ userP :: ActionM User -> ActionM()
 userP jsonUser = do
     user <- jsonUser
     json user
+
+personP :: ActionM User -> ActionM()
+personP jsonPerson = do
+    person <- jsonPerson
+    json person
+
+-- Parse the request body into the Person
+getPersonParam :: ActionT TL.Text IO (Maybe Person)
+getPersonParam = do b <- body
+                    return $ (A.decode b :: Maybe Person)
+
+createdPerson :: Maybe Person -> ActionM ()
+createdPerson person = json ()                    
