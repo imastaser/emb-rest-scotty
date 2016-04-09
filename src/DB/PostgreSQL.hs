@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- {-# LANGUAGE NoImplicitPrelude #-}
+
 
 module DB.PostgreSQL where
 
 
-import Emb.Types (Environment(..), DbConfig(..))
+import Emb.Types (DefaultEnv(..), DbConfig(..))
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField (toField)  
@@ -30,7 +32,7 @@ connString = BS8.pack $ unwords [ "host='localhost'"
                         ]
 
 -- | parse postgresql.config and make DbConfig for given environment
-parseConfig :: Environment -> FilePath -> IO DbConfig
+parseConfig :: DefaultEnv -> FilePath -> IO DbConfig
 parseConfig e configFile =
     do config   <- C.load [C.Required configFile]
        host     <- C.require config "host"
@@ -43,7 +45,8 @@ parseConfig e configFile =
        let (dbEnv, n) = case e of
                           Development -> ("_development", 1)
                           Production  -> ("_production", 8)
-                          Test        -> ("_test", 1)
+                          Staging     -> ("_production", 8)
+                          Testing     -> ("_test", 1)
        return $ DbConfig
                   {
                     dbHost        = host

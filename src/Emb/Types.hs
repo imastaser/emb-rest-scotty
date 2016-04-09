@@ -5,12 +5,12 @@ module Emb.Types where
 
 import qualified Data.Text  as T    
 
-data Environment
-   = Development
-   | Production
-   | Test
-   deriving (Eq, Read, Show)
-
+-- | @'AppEnv'@, allows for Development, Testing, and
+--   Production environments
+data DefaultEnv = Development
+                | Testing
+                | Staging
+                | Production deriving (Read, Show, Enum, Bounded)
 
 
 

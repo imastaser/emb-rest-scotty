@@ -21,6 +21,8 @@ main = do
     let env  = Development
     let logO = case env of
                 Development -> logStdoutDev
+                Testing     -> logStdoutDev
+                Staging     -> logStdoutDev
                 Production  -> logStdout
     cfg <- parseConfig env "postgresql.config"
     mkDB cfg -- creating db if not exists, do not need pool
