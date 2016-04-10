@@ -9,11 +9,12 @@ import qualified Data.Aeson as A
 --import Data.Monoid ((<>))
 --import Prelude
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad (foldM, mapM_)
 import qualified Data.Text.Internal.Lazy as L
 import Database.PostgreSQL.Simple
 import Data.Foldable(forM_)
 import qualified Data.Text.Lazy as TL
-
+import Lucid
 import Network.HTTP.Types.Status ( created201
                                  , internalServerError500
                                  , notFound404)
@@ -50,7 +51,16 @@ main = do
                            json ps
     get "/person/" $ do 
                        ps <- liftIO $  allPerson pool
-                       json ps                       
+                       html . renderText $
+                          html_ $
+                            body_ $ do
+                              h1_ "Title"
+                              p_ "Hello Lucid World!"
+                              mapM_ (\p -> p_ [] (toHtml (personEmail p))) ps
+                              with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
+                                input_ [type_ "text", name_ "url"]
+                                with button_ [type_ "submit"] "Shorten"
+
     post "/person" $ do person <- getPersonParam
                         insertPerson pool person
                         -- status created201
