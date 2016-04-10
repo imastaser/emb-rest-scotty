@@ -8,11 +8,14 @@ import Web.Scotty.Internal.Types
 import qualified Data.Aeson as A
 --import Data.Monoid ((<>))
 --import Prelude
-    
+import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text.Internal.Lazy as L
 import Database.PostgreSQL.Simple
 
 import qualified Data.Text.Lazy as TL
+
+import Network.HTTP.Types.Status (created201,
+   internalServerError500, notFound404)
 
 
 
@@ -40,9 +43,13 @@ main = do
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
+    get "/person/:id" $ do i  <- param "id"
+                           [ps] <- liftIO $  findPerson pool i
+                           json ps
     post "/person" $ do person <- getPersonParam -- read the request body, try to parse it into article
-                        insertPerson pool person -- insert the parsed article into the DB
-                        createdPerson person     -- show info that the article was created
+                        insertPerson pool person
+                        status created201
+                        json person     -- show info that the article was created
 
     -- get "/testpg" $ text ( testPg)
     -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
@@ -61,6 +68,7 @@ userP :: ActionM User -> ActionM()
 userP jsonUser = do
     user <- jsonUser
     json user
+
 
 personP :: ActionM User -> ActionM()
 personP jsonPerson = do

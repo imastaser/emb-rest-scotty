@@ -35,4 +35,22 @@ insertPerson pool (Just (Person _ firstName lastName email)) = do
 insertPersonQ :: Query
 insertPersonQ = "INSERT INTO person(firstName, lastName, email) VALUES(?,?,?)"
 
+findPerson :: Pool Connection -> Int -> IO [Person]
+findPerson pool id = do
+     res <- fetch1 pool (Only id) getPersonQ :: IO [Person] 
+     return  res
+
+getPersonQ :: Query
+getPersonQ = "Select id,firstname, lastname, email FROM person WHERE id = ?"
+
+
+--------------------------------------------------------------------------------
+-- Utilities for interacting with the DB.
+-- No transactions.
+--
+-- Accepts arguments
+fetch1 :: (FromRow r, ToRow q) => Pool Connection -> q -> Query -> IO [r]
+fetch1 pool args sql = withResource pool retrieve
+      where retrieve conn = query conn sql args
+
 
