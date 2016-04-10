@@ -11,13 +11,14 @@ import Control.Applicative
 import Data.Text (Text)
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.FromRow
+import Data.Aeson (FromJSON, ToJSON) 
 
 data Product = Product
               {
-                 productId    :: ProductId
-               , productPersonId     :: PersonId
-               , productName  :: Text
-               , productPrice :: Int
+                 productId         :: ProductId
+               , productPersonId   :: PersonId
+               , productName       :: Text
+               , productPrice      :: Int
               } 
               deriving (Show)
 

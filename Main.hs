@@ -69,16 +69,7 @@ userP jsonUser = do
     user <- jsonUser
     json user
 
-
-personP :: ActionM User -> ActionM()
-personP jsonPerson = do
-    person <- jsonPerson
-    json person
-
 -- Parse the request body into the Person
 getPersonParam :: ActionT TL.Text IO (Maybe Person)
 getPersonParam = do b <- body
                     return $ (A.decode b :: Maybe Person)
-
-createdPerson :: Maybe Person -> ActionM ()
-createdPerson person = json ()                    

@@ -13,7 +13,7 @@ import Emb.Types
 
 import Data.Pool
 import Data.Maybe
-import Control.Monad (void, unless, forM_)
+import Control.Monad (void, unless, when, forM_)
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.SqlQQ
@@ -28,7 +28,7 @@ import qualified Data.Text as T
 
 
 -- void $ execute_  c createDBQ  -- (Only "embroidery_development" :: Only String)
-
+mkDB :: DbConfig -> IO ()
 mkDB cfg  = do 
     conn <- connect defaultConnectInfo
                        { 
@@ -39,15 +39,15 @@ mkDB cfg  = do
                       [sql| SELECT datname FROM pg_database 
                             WHERE datname = ? 
                       |] (Only (dbName cfg))
-    unless (not . null $ xs) $ do 
+    when (null $ xs) $ do 
         void $ execute_ conn (
           fromString $
-                        "CREATE DATABASE " ++ (T.unpack $ dbName cfg) ++
-                        " WITH OWNER = postgres   \
-                        \  ENCODING = 'UTF8'      \
-                        \ TABLESPACE = pg_default \
-                        \ CONNECTION LIMIT = -1;"
-                      )
+                    "CREATE DATABASE " ++ (T.unpack $ dbName cfg) ++
+                    " WITH OWNER = postgres   \
+                    \  ENCODING = 'UTF8'      \
+                    \ TABLESPACE = pg_default \
+                    \ CONNECTION LIMIT = -1;"
+                  )
 
         -- createDBQ (Only (dbName cfg))
    
@@ -99,6 +99,7 @@ fetch' c q v =
   fmap (fmap fromOnly) $ fetch c q v
 
 -- getMigrations :: Connection -> IO [ChangeHistory]
+getMigrations :: forall r. FromRow r => Connection -> IO [r]
 getMigrations conn = query_ conn migrationsQ
 
 -------------------------------------------------------------------------------
@@ -117,15 +118,6 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 );
 |]
 
-
-createDBQ :: Query
-createDBQ = [sql|
-CREATE DATABASE =?
-  WITH OWNER = postgres
-       ENCODING = 'UTF8'
-       TABLESPACE = pg_default
-       CONNECTION LIMIT = -1;
-|]
 
 personQ :: Query
 personQ = [sql|
@@ -186,7 +178,7 @@ hello dbname = do
 
  -- execute_ conn ((fromString ("CREATE DATABASE " ++ "dbname")) :: Query)                    
   
-  execute_ conn (
+  _ <- execute_ conn (
           fromString $
                         "CREATE DATABASE " ++ dbname ++
                         " WITH OWNER = postgres \
@@ -198,11 +190,7 @@ hello dbname = do
                     WHERE datname = ? 
                   |] (Only "test" :: Only T.Text)
 
-
-newtype TEST = TEST {nname :: T.Text} deriving (Show)
-  
-
-                                      
+                                    
   -- query_ conn  ifdbExistsQ 
   --xs <- query_ conn ifdbExistsQ
   --forM_ xs $ \(name) ->
@@ -225,12 +213,4 @@ ka conn       = query_ conn  ifdbExistsQ
 
 --}
 
-metaPool = createPool (connect defaultConnectInfo
-                       { 
-                         connectUser     = "postgres"
-                       , connectPassword = "Welcome*99"
-                       }) close 1 40 10
 
-
-sqlee =error "Database.PostgreSQL.Simple.SqlQQ.sql:\
-                        \ quasiquoter used in type context"
