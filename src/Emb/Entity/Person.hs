@@ -25,37 +25,44 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.SqlQQ
+import Database.PostgreSQL.Simple.ToField
+import Database.PostgreSQL.Simple.ToRow
+import Database.PostgreSQL.Simple.FromRow
 
 import Emb.Entity.Newtypes
 import Control.Applicative
-
-import Database.PostgreSQL.Simple.FromRow
 import Data.Aeson 
 import GHC.Base hiding (id)
-{--data Person = Person 
-              {  personId       :: PersonId
-               , personName     :: Text
-               , personLastName :: Text
-               , personEmail    :: Text
+
+data Person = Person 
+              {  personId       :: Int
+               , personName     :: TL.Text
+               , personLastName :: TL.Text
+               , personEmail    :: TL.Text
               } 
               deriving (Show)
---}
-data Person = Person Integer TL.Text TL.Text TL.Text -- id title bodyText
-     deriving (Show)              
+
+----data Person = Person Integer TL.Text TL.Text TL.Text -- id title bodyText
+    -- deriving (Show)              
 
 instance FromRow Person where
   fromRow = Person <$> field
                    <*> field
                    <*> field
                    <*> field
-
+instance ToRow Person where
+  toRow person =
+    [ toField (personName person)
+    , toField (personLastName person)
+    , toField (personEmail person)
+    ]
 
 instance FromJSON Person where
   parseJSON (Object v) = 
     Person <$>
             v .:? "id" .!= 0  <*> -- the field "id" is optional
-            v .:  "firstName" <*>
-            v .:  "lastName"  <*>
+            v .:  "firstname" <*>
+            v .:  "lastname"  <*>
             v .:  "email"    
 
 instance FromRow PersonId where
@@ -75,9 +82,8 @@ instance ToJSON Person where
 
 insertPerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO ()
 insertPerson _    Nothing = return ()
-insertPerson pool (Just (Person _ firstName lastName email)) = do
-     _ <- liftIO $ execSqlT pool [firstName, lastName, email] 
-                            insertPersonQ
+insertPerson pool (Just person) = do
+     _ <- liftIO $ execSqlT pool person insertPersonQ
      return ()
 
 
