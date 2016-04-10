@@ -11,11 +11,12 @@ import qualified Data.Aeson as A
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text.Internal.Lazy as L
 import Database.PostgreSQL.Simple
-
+import Data.Foldable(forM_)
 import qualified Data.Text.Lazy as TL
 
-import Network.HTTP.Types.Status (created201,
-   internalServerError500, notFound404)
+import Network.HTTP.Types.Status ( created201
+                                 , internalServerError500
+                                 , notFound404)
 
 
 
@@ -43,13 +44,25 @@ main = do
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
+
     get "/person/:id" $ do i  <- param "id"
                            [ps] <- liftIO $  findPerson pool i
                            json ps
-    post "/person" $ do person <- getPersonParam -- read the request body, try to parse it into article
+    get "/person/" $ do 
+                       ps <- liftIO $  allPerson pool
+                       json ps                       
+    post "/person" $ do person <- getPersonParam
                         insertPerson pool person
-                        status created201
+                        -- status created201
                         json person     -- show info that the article was created
+    
+    put "/person" $ do  person <- getPersonParam 
+                        updatePerson pool person
+                        json person     
+     -- DELETE
+    delete "/person/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id
+                              deletePerson pool id  -- delete the article from the DB
+                              json id      -- show info that the article was deleted
 
     -- get "/testpg" $ text ( testPg)
     -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
@@ -73,3 +86,4 @@ userP jsonUser = do
 getPersonParam :: ActionT TL.Text IO (Maybe Person)
 getPersonParam = do b <- body
                     return $ (A.decode b :: Maybe Person)
+

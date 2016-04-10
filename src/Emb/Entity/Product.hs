@@ -11,7 +11,7 @@ import Control.Applicative
 import Data.Text (Text)
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.FromRow
-import Data.Aeson (FromJSON, ToJSON) 
+import Data.Aeson 
 
 data Product = Product
               {
@@ -28,8 +28,11 @@ instance FromRow Product where
                     <*> field
                     <*> field
 
-instance FromRow PersonId where
+instance FromRow ProductId where
     fromRow = field
+
+instance FromRow PersonId where
+    fromRow = field    
 
 instance FromRow Int where
     fromRow = field

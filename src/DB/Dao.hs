@@ -33,3 +33,7 @@ fetch1 pool args sql = withResource pool retrieve
       where retrieve conn = query conn sql args
 
 
+-- No arguments -- just pure sql
+fetchSimple1 :: FromRow r => Pool Connection -> Query -> IO [r]
+fetchSimple1 pool sql = withResource pool retrieve
+       where retrieve conn = query_ conn sql
