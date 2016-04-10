@@ -1,0 +1,29 @@
+#+TITLE: Embroidery service bookkeeping
+#+AUTHOR: Arthur Vardanyan
+#+EMAIL: artie.vard@gmail.com
+#+DATE: 2016-03-04
+#+UPDATE: 08:35:49
+#+STARTUP: content
+[[https://github.com/ArthurVard/emb-rest][source on github]]
+
+[[https://www.stackage.org/lts-5.10/cabal.config][Stackage snapshot of 5.19]]
+[[][cabal file]
+[[stack file
+
+
+
+* Resources
+  [[https://hackage.haskell.org/package/scotty][Scotty on hackage]]
+  http://groups.inf.ed.ac.uk/links/papers/formlets-essence.pdf
+
+* Lucid
+  - [[http://redlua.com/post/url-shortening-in-haskell-with-scotty-and-lucid/][Url shortening in Haskell with Scotty and Lucid]]
+  - [[https://www.schoolofhaskell.com/user/AthanClark/overloaded-monadic-deployment][Overloading Monads for Html Deployment]]
+  - [[http://chrisdone.com/posts/lucid2][Lucid 2.0: clearer than before]]
+  - [[http://chrisdone.com/posts/lucid][Lucid 1.0]]
+  - https://hackage.haskell.org/package/lucid-2.1/docs/Lucid-Bootstrap.html
+
+** Lucid example
+   - https://github.com/relrod/isysuclosed.com/blob/haskell/Main.hs
+   - https://github.com/sample-fork/SplicersWeb/blob/master/src/Rendering.hs
+ 
