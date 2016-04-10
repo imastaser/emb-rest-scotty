@@ -4,7 +4,7 @@
 #+DATE: 2016-03-04
 #+UPDATE: 08:35:49
 #+STARTUP: content
-[[https://github.com/ArthurVard/emb-rest][source on github]]
+[[https://github.com/ArthurVard/emb-rest-scotty][source on github]]
 
 [[https://www.stackage.org/lts-5.10/cabal.config][Stackage snapshot of 5.19]]
 [[][cabal file]
@@ -13,8 +13,26 @@
 
 
 * Resources
+  http://www.stephendiehl.com/posts/haskell_web.html
   [[https://hackage.haskell.org/package/scotty][Scotty on hackage]]
   http://groups.inf.ed.ac.uk/links/papers/formlets-essence.pdf
+  [[https://www.airpair.com/haskell/posts/haskell-tutorial-introduction-to-web-apps][from MFlow author]] - https://tryplayg.herokuapp.com/try/mybudget.hs/edit
+
+* CSS EDSL 
+  - [[http://fvisser.nl/clay/][Clay]]
+  - [[https://github.com/chrisdone/css][css from Chris done]]
+
+* Haskell-to-JavaScript compilers
+  
+** [[https://github.com/ghcjs/ghcjs][ghcjs]]
+
+** [[http://haste-lang.org/][haste]]
+   https://github.com/valderman/haste-compiler
+
+** [[https://github.com/faylang][fay]]
+
+** [[http://elm-lang.org/][Elm]]
+
 
 * Lucid
   - [[http://redlua.com/post/url-shortening-in-haskell-with-scotty-and-lucid/][Url shortening in Haskell with Scotty and Lucid]]

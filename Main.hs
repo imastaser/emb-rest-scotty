@@ -20,8 +20,14 @@ import Network.HTTP.Types.Status ( created201
                                  , notFound404)
 
 
-
-import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
+import Data.Default (def)
+import Network.Wai.Middleware.RequestLogger ( mkRequestLogger
+                                            , logStdoutDev
+                                            , logStdout
+                                            , destination
+                                            , RequestLoggerSettings(outputFormat)
+                                            , OutputFormat(Detailed, Apache)
+                                            , IPAddrSource(FromHeader, FromSocket))
 
 
 main :: IO ()
@@ -33,14 +39,23 @@ main = do
     let logO = case env of
                 Development -> logStdoutDev
                 Testing     -> logStdoutDev
-                Staging     -> logStdoutDev
-                Production  -> logStdout
+                Staging     -> logStdoutDev --  Detailed True logging format and logs to stdout
+                Production  -> logStdout    --  This uses the Apache logging format
     cfg <- parseConfig env "postgresql.config"
     mkDB cfg -- creating db if not exists, do not need pool
+    logger <-  mkRequestLogger def 
+                       { outputFormat =
+                              case env of
+                                Development -> Detailed True
+                                _           -> Apache FromSocket
+                                -- if nginx should Apache FromHeader
+                       -- , destination = RequestLogger.Logger $ loggerSet $ appLogger foundation  
+                       }  
     pool <- mkPool  cfg 
     migrate1 pool
     scotty (port argCfg) $ do
-    middleware logO 
+    
+    middleware  logger -- logO 
 
     get "/word/:word" $ wordR "word"
     get "/users" usersR
