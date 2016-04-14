@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-
 import Entity
 import Web.Scotty
 import Web.Scotty.Internal.Types 
+
+import Rendering 
 
 import qualified Data.Aeson as A
 --import Data.Monoid ((<>))
@@ -21,6 +22,7 @@ import Network.HTTP.Types.Status ( created201
 
 
 import Data.Default (def)
+import Network.Wai.Middleware.Static
 import Network.Wai.Middleware.RequestLogger ( mkRequestLogger
                                             , logStdoutDev
                                             , logStdout
@@ -56,6 +58,7 @@ main = do
     scotty (port argCfg) $ do
     
     middleware  logger -- logO 
+    middleware $ staticPolicy (noDots >-> addBase "content")
 
     get "/word/:word" $ wordR "word"
     get "/users" usersR
@@ -75,6 +78,11 @@ main = do
                               with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
                                 input_ [type_ "text", name_ "url"]
                                 with button_ [type_ "submit"] "Shorten"
+
+    get  "/person/add" $ do html . renderText $ renderAddPerson
+    post "/person/add" $ do person <- getPersonParam
+                            insertPerson pool person
+                            json person
 
     post "/person" $ do person <- getPersonParam
                         insertPerson pool person

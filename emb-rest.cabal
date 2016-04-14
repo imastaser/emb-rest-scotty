@@ -19,6 +19,7 @@ executable          emb-rest
                   , resource-pool     >=0.2.3.2
                   , data-default      >=0.5.3
                   -- logStdout
+                  , wai-middleware-static         >= 0.7.0.1
                   , wai-extra         >=3.0.7   
                   , http-types        >=0.9
                   , transformers 
