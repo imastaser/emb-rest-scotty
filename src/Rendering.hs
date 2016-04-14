@@ -9,6 +9,8 @@ import Data.Text (unpack, pack)
 import Data.Monoid ((<>))
 import Entity
 import Lucid
+import Lucid.Base
+import Lucid.Validation
 
 css :: Text -> Html ()
 css name = link_ [rel_ "stylesheet", type_ "text/css", href_ name]
@@ -48,7 +50,9 @@ field name helpText inputType defaultValue =
             input_ [ type_ inputType
                    , name_ name
                    , id_  name
-                   , value_ defaultValue
+                   , value_ "Person Name"
+                   , data_val_  "true"
+                   , data_val_required_ "This field is required"
                    ]
             span_ (toHtml helpText)
 
