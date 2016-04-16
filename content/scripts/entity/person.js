@@ -52,10 +52,13 @@ var PersonEntity = {
             }
         });
     }
-}
+};
 
+// $(function(){
+// });
 
-$(function(){
-  $("#addBtn").on("click", PersonEntity.Add);
+jQuery(document).ready(
+    function () {
+    $("#addBtn").on("click", PersonEntity.Add);    
 });
 

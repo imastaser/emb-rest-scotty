@@ -1,12 +1,3 @@
-form div {
-    margin-bottom: 0.5em;
-}
-form div label, form div input {
-    display: block;
-    margin-bottom: 0.3em;
-}
-
-
 /*error message*/
 .error_message { background: rgba(0,0,0,.06);position: relative;width: 260px;border-radius: 3px;margin-bottom:10px;float:right;}
 .error_message .field-validation-error, .login_container footer .field-validation-valid {display: table-cell;height: 40px;color:rgba(85,85,85,1);font-size:11px;padding: 0 10px 0 50px;text-align: left;-webkit-animation:error1 ease .2s;vertical-align: middle;width:260px;text-transform: uppercase;}
