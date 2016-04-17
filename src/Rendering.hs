@@ -9,7 +9,7 @@ import Data.Text (unpack, pack)
 import Data.Monoid ((<>))
 import Entity
 import Lucid
-
+import Lucid.Bootstrap
 import Lucid.Validation
 import Lucid.Helper
 
@@ -56,6 +56,7 @@ renderPage styles scripts body =
             styles
             body_ $ do
               nav_ [class_ "navbar navbar-static-top"] navBar 
+              div_ [class_ "clear"] ""
               div_ [class_ "container"] body
               scripts
        )
@@ -64,10 +65,13 @@ renderPage styles scripts body =
 renderAddPerson :: Html ()
 renderAddPerson  =
   renderPage allCSS (allJS <> personjs) $ do
-    form_ [id_ "personForm", method_ "post"] $ do
-      textBox "firstname" "Անուն" [  data_val_  "true"
-                                  , data_val_required_ "This field is required"] 
-      textBox "lastname"  "Ազգանուն" [] 
-      textBox "email"  "" []
-      br_ []
-      input_ [type_ "button", id_ "addBtn", class_ "button", value_ "Add Person"]
+    row_ $ 
+      span6_ $ do
+        h2_ "Ավելացնել Հաճախորդ"
+        br_ []        
+        form_ [id_ "personForm", method_ "post"] $ do
+          textBox "Անուն" "firstname" "" reqAttr 
+          textBox "Ազգանուն" "lastname"  "" [] 
+          textBox "էլ-փոստ" "email"  "" []
+          br_ []
+          input_ [type_ "button", id_ "addBtn", class_ "button", value_ "Ավելացնել"]
