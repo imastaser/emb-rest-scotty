@@ -60,6 +60,7 @@ main = do
     middleware  logger -- logO 
     middleware $ staticPolicy (noDots >-> addBase "content")
 
+    get  "/" $ do html . renderText $ renderHomePage
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
@@ -69,16 +70,8 @@ main = do
                            json ps
     get "/person/" $ do 
                        ps <- liftIO $  allPerson pool
-                       html . renderText $
-                          html_ $
-                            body_ $ do
-                              h1_ "Title"
-                              p_ "Hello Lucid World!"
-                              mapM_ (\p -> p_ [] (toHtml (personEmail p))) ps
-                              with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
-                                input_ [type_ "text", name_ "url"]
-                                with button_ [type_ "submit"] "Shorten"
-
+                       html . renderText . renderPersons $ ps
+                         
     get  "/person/add" $ do html . renderText $ renderAddPerson
     post "/person/add" $ do person <- getPersonParam
                             insertPerson pool person

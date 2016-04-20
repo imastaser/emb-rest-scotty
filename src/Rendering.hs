@@ -53,18 +53,18 @@ renderPage styles scripts body =
       doctype_ <> html_
       (do head_ 
         $ do
-            styles
+            (allCSS <> styles)
             body_ $ do
               nav_ [class_ "navbar navbar-static-top"] navBar 
               div_ [class_ "clear"] ""
               div_ [class_ "container"] body
-              scripts
+              (allJS <> scripts)
        )
 
 
 renderAddPerson :: Html ()
 renderAddPerson  =
-  renderPage allCSS (allJS <> personjs) $ do
+  renderPage mempty personjs $ do
     row_ $ 
       span6_ $ do
         h2_ "Ավելացնել Հաճախորդ"
@@ -75,3 +75,23 @@ renderAddPerson  =
           textBox "էլ-փոստ" "email"  "" []
           br_ []
           input_ [type_ "button", id_ "addBtn", class_ "button", value_ "Ավելացնել"]
+
+
+renderHomePage :: Html ()
+renderHomePage  =
+  renderPage mempty mempty "Embroidery Service Bookkeeping"
+
+renderPersons :: [Person] -> Html()
+renderPersons ps = 
+  renderPage mempty mempty $
+      html_ $
+        body_ $ do
+          h1_ "Title"
+          p_ "Hello Lucid World!"
+          mapM_ (\p -> p_ [] (toHtml (personEmail p))) ps
+          with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
+            input_ [type_ "text", name_ "url"]
+            with button_ [type_ "submit"] "Shorten"
+
+
+
