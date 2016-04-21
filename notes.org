@@ -45,3 +45,6 @@
    - https://github.com/relrod/isysuclosed.com/blob/haskell/Main.hs
    - https://github.com/sample-fork/SplicersWeb/blob/master/src/Rendering.hs
  
+
+** PostgreSQL tricks
+  - [[https://github.com/sample-fork/hs-pastebin/blob/master/src/Model.hs][return id usage]]

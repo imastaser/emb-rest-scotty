@@ -34,6 +34,9 @@ import Network.Wai.Middleware.RequestLogger ( mkRequestLogger
                                             , OutputFormat(Detailed, Apache)
                                             , IPAddrSource(FromHeader, FromSocket))
 
+import Data.Text.Lazy (toStrict)
+
+lucidRender = html . renderText
 
 main :: IO ()
 main = do
@@ -63,7 +66,7 @@ main = do
     middleware  logger -- logO 
     middleware $ staticPolicy (noDots >-> addBase "content")
 
-    get  "/" $ do html . renderText $ renderHomePage
+    get  "/" $ do lucidRender  renderHomePage
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
@@ -73,7 +76,7 @@ main = do
                            json ps
     get "/person/" $ do 
                        ps <- liftIO $  allPerson pool
-                       html . renderText . renderPersons $ ps
+                       lucidRender . renderPersons $ ps
                          
     get  "/person/add" $ do
                           ps <- liftIO $  allPerson pool 
@@ -84,8 +87,8 @@ main = do
                             [Only newId] <- lift $ insertPerson pool person 
                             -- json person
                             case person of
-                              (Just p) ->  html . renderText $ personRow p newId
-                              Nothing -> html . renderText $ p_"error"
+                              (Just p) -> lucidRender $ personRow p newId
+                              Nothing -> lucidRender $ p_"error"
     post "/person" $ do person <- getPersonParam
                         lift $ insertPerson pool person
                         -- status created201
