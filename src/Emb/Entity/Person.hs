@@ -9,7 +9,8 @@ module Emb.Entity.Person
        , updatePerson
        , deletePerson
        , findPerson
-       , allPerson)
+       , allPerson
+       )
        where
 import DB.Dao
 import Data.Pool(Pool, withResource)
@@ -28,19 +29,22 @@ import Database.PostgreSQL.Simple.SqlQQ
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.ToRow
 import Database.PostgreSQL.Simple.FromRow
+import Database.PostgreSQL.Simple.FromField
 
 import Emb.Entity.Newtypes
 import Control.Applicative
 import Data.Aeson 
 import GHC.Base hiding (id)
+import GHC.Int(Int64)
 
 data Person = Person 
-              {  personId       :: Int
+              {  personId       :: Int64
                , personName     :: TL.Text
                , personLastName :: TL.Text
                , personEmail    :: TL.Text
               } 
               deriving (Show)
+
 
 ----data Person = Person Integer TL.Text TL.Text TL.Text -- id title bodyText
     -- deriving (Show)              
@@ -68,7 +72,13 @@ instance FromJSON Person where
 instance FromRow PersonId where
     fromRow = field
 
+--instance FromRow Id where
+--    fromRow = field
+
 instance FromRow Int where
+    fromRow = field
+
+instance FromRow Int64 where
     fromRow = field
 
 
@@ -80,11 +90,11 @@ instance ToJSON Person where
                  "email"  .= email]   
 
 
-insertPerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO ()
-insertPerson _    Nothing = return ()
+insertPerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO PersonId
+insertPerson _    Nothing = return (PersonId 0)
 insertPerson pool (Just person) = do
-     _ <- liftIO $ execSqlT pool person insertPersonQ
-     return ()
+     pid <- liftIO $ execSqlT pool person insertPersonQ 
+     return (PersonId pid)
 
 
 findPerson :: Pool Connection -> Int -> IO [Person]
@@ -124,7 +134,7 @@ insertPersonQ :: Query
 insertPersonQ = [sql|
                  INSERT INTO person
                  (firstName, lastName, email)
-                 VALUES(?,?,?)|]
+                 VALUES(?,?,?) RETURNING id|]
 
 updatePersonQ :: Query
 updatePersonQ = [sql|

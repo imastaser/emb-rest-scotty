@@ -5,14 +5,14 @@ module Rendering where
 
 import Control.Monad (foldM, mapM_)
 import Data.Text.Internal (Text)
-import Data.Text (unpack, pack)
+import Data.Text (unpack, pack, append)
 import Data.Monoid ((<>))
 import Entity
 import Lucid
 import Lucid.Bootstrap
 import Lucid.Validation
 import Lucid.Helper
-
+import GHC.Int(Int64)
 
 css :: Text -> Html ()
 css name = link_ [rel_ "stylesheet", type_ "text/css", href_ name]
@@ -40,7 +40,7 @@ personjs = js "/scripts/entity/person.js"
 
 allCSS :: Html ()
 allCSS = do (css "/css/styles.css")
-            (css "/css/bootstrap.min.css")
+            (css "/css/bootstrap.css")
             (css "http://fonts.googleapis.com/css?family=Karla:400,700,400italic,700italic")
 
 allJS :: Html ()
@@ -88,10 +88,25 @@ renderPersons ps =
         body_ $ do
           h1_ "Title"
           p_ "Hello Lucid World!"
-          mapM_ (\p -> p_ [] (toHtml (personEmail p))) ps
+          table_ [ id_ "ps", class_ "table table-hover"] $ do
+            thead_ $
+               tr_ $ do
+                th_ "Name"
+                th_ "Last Name"
+                th_ "Email" 
+            tbody_ $ do
+               mapM_ (\p -> personRow p (personId p)) ps
           with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
             input_ [type_ "text", name_ "url"]
             with button_ [type_ "submit"] "Shorten"
 
 
-
+personRow :: Person -> Int64 -> Html()
+personRow p id = 
+  tr_ [id_ newId] $ do
+    td_ (toHtml $ personName p)
+    td_ (toHtml $ personLastName p)
+    td_ (toHtml $ personEmail p)
+  where 
+    newId :: Text
+    newId = pack $ "p_" ++ show id

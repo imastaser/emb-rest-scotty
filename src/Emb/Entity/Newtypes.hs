@@ -12,8 +12,9 @@ module Emb.Entity.Newtypes
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.FromField
 import Database.PostgreSQL.Simple.ToField
+import GHC.Int(Int64)
 
-newtype PersonId = PersonId Int
+newtype PersonId = PersonId Int64
   deriving (Eq,FromField,ToField,Ord)
 
 instance Show PersonId where show (PersonId pid) = show pid

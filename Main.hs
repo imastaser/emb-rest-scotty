@@ -7,6 +7,7 @@ import Web.Scotty.Internal.Types
 import Rendering 
 
 import qualified Data.Aeson as A
+import Emb.Entity.Newtypes (PersonId(..))
 --import Data.Monoid ((<>))
 --import Prelude
 import Control.Monad.IO.Class (liftIO)
@@ -16,6 +17,7 @@ import Database.PostgreSQL.Simple
 import Data.Foldable(forM_)
 import qualified Data.Text.Lazy as TL
 import Lucid
+import Data.Monoid ((<>))
 import Network.HTTP.Types.Status ( created201
                                  , internalServerError500
                                  , notFound404)
@@ -72,11 +74,17 @@ main = do
                        ps <- liftIO $  allPerson pool
                        html . renderText . renderPersons $ ps
                          
-    get  "/person/add" $ do html . renderText $ renderAddPerson
-    post "/person/add" $ do person <- getPersonParam
-                            insertPerson pool person
-                            json person
+    get  "/person/add" $ do
+                          ps <- liftIO $  allPerson pool 
+                          html . renderText 
+                            $ (renderAddPerson <> renderPersons ps)
 
+    post "/person/add" $ do person <- getPersonParam
+                            (PersonId newId)  <- insertPerson pool person 
+                            -- json person
+                            case person of
+                              (Just p) ->  html . renderText $ personRow p newId
+                              Nothing -> html . renderText $ p_"error"
     post "/person" $ do person <- getPersonParam
                         insertPerson pool person
                         -- status created201

@@ -43,6 +43,9 @@ var PersonEntity = {
             preloaderSelector: "",
             success: function (response) {
                 
+        $('#ps').append(response);
+        $('#p_1').fadeIn('slow');
+
                 console.log(response);
 
             },
