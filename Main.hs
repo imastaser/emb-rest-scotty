@@ -11,6 +11,7 @@ import Emb.Entity.Newtypes (PersonId(..))
 --import Data.Monoid ((<>))
 --import Prelude
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Class (lift)
 import Control.Monad (foldM, mapM_)
 import qualified Data.Text.Internal.Lazy as L
 import Database.PostgreSQL.Simple
@@ -80,13 +81,13 @@ main = do
                             $ (renderAddPerson <> renderPersons ps)
 
     post "/person/add" $ do person <- getPersonParam
-                            (PersonId newId)  <- insertPerson pool person 
+                            [Only newId] <- lift $ insertPerson pool person 
                             -- json person
                             case person of
                               (Just p) ->  html . renderText $ personRow p newId
                               Nothing -> html . renderText $ p_"error"
     post "/person" $ do person <- getPersonParam
-                        insertPerson pool person
+                        lift $ insertPerson pool person
                         -- status created201
                         json person     -- show info that the article was created
     

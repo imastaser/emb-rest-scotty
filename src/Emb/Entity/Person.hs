@@ -90,11 +90,9 @@ instance ToJSON Person where
                  "email"  .= email]   
 
 
-insertPerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO PersonId
-insertPerson _    Nothing = return (PersonId 0)
-insertPerson pool (Just person) = do
-     pid <- liftIO $ execSqlT pool person insertPersonQ 
-     return (PersonId pid)
+insertPerson :: Pool Connection -> Maybe Person -> IO [Only Int64]
+insertPerson _    Nothing = return [Only 0]
+insertPerson pool (Just person) = fetch1 pool person insertPersonQ 
 
 
 findPerson :: Pool Connection -> Int -> IO [Person]
