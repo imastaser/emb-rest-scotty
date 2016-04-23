@@ -68,13 +68,20 @@ personRow p id =
     td_ (toHtml $ personName p)
     td_ (toHtml $ personLastName p)
     td_ (toHtml $ personEmail p)
-    td_ (a_ [class_ "btn btn-default", href_ editUrl] "Խմբագրել")
-    td_ (a_ [ class_ "btn btn-danger"
+    td_ (a_ [ class_ "rest-edit btn btn-default"
+            , href_ editUrl
+            , data_method_ "put"
+            , data_tag_ pid
+            , href_ editUrl] "Խմբագրել")
+    td_ (a_ [ class_ "rest-delete btn btn-danger"
             , data_method_ "delete"
             , data_confirm_ "Are you sure?"
+            , data_tag_ pid
             , href_ deleteUrl
             , rel_ "nofollow"] "Ջնջել")
   where 
+    pid :: Text
+    pid = pack $ show id
     newId :: Text
     newId = pack $ "p_" ++ show id
     editUrl :: Text

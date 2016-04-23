@@ -1,4 +1,11 @@
+(function() {
+
 var PersonEntity = {
+    initialize: function() {
+        $("#addBtn").on("click", PersonEntity.Add);
+        $('#firstname').focus();    
+        PersonEntity.initDelete($('.rest-delete'));
+    },
     Initializing: true,
     OnSuccess: null,
     GetData: function (form) {
@@ -42,11 +49,17 @@ var PersonEntity = {
             showPreloader: false,
             preloaderSelector: "",
             success: function (response) {
-                //response.prependTo('#ps');      
-                $('#ps').prepend(response);
-                $('#p_1').fadeIn('slow');
+                //response.prependTo('#ps'); 
+                var row = $(response)  
+                row.hide();
+                $('#ps').prepend(row);
+                $("#ps tr").eq(1).fadeIn('slow')
+                //$('#ps').children('tr:first').fadeIn('slow');
                 PersonEntity.Reset()
-                //console.log(response);
+                var delLink = $(row).find("a[data-method='delete']");
+  
+                PersonEntity.initDelete(delLink);
+                             //console.log(response);
             },
             error: function (err) {
                console.log(err);
@@ -60,16 +73,48 @@ var PersonEntity = {
         $('#firstname').val('');
         $('#lastname').val('');
         $('#email').val('');
+    },
+
+    initDelete: function(elem) {
+        elem.on('click', function(e) {
+            self=$(this);
+            e.preventDefault();
+            var id = self.data("tag");
+            if(confirm('Are you sure?')) {
+
+              $.ajax({
+                url: self.attr('href'),
+                method: 'DELETE',
+                success: function(data) {
+                    console.log(data);
+                    var item = '#p_'+ id;
+                    $(item).fadeOut('slow');
+                    $(item).hide();
+                },
+                error: function(data) {
+                    alert("Error while deleting.");
+                    console.log(data);
+                }
+              });
+            };
+        })
     }
+
+  
 };
+
+  PersonEntity.initialize();
+
+})();
 
 // $(function(){
 // });PersonEntity
 
-jQuery(document).ready(
-    function () {
+// jQuery(document).ready(
+//     function () {
 
-    $("#addBtn").on("click", PersonEntity.Add);
-    $('#firstname').focus();    
-});
+    
+
+// });
+
 

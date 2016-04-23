@@ -115,10 +115,21 @@ updatePerson pool (Just (Person id firstname lastname email)) = do
      return ()     
 
 
-deletePerson :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
+deletePerson :: Pool Connection -> Int -> ActionT TL.Text IO ()
 deletePerson pool id = do
-     liftIO $ execSqlT pool [id] "DELETE FROM person WHERE id=?"
+     liftIO $ execSqlT pool (Only id) "DELETE FROM person WHERE id=?"
      return ()
+
+  --deletePerson1 :: Pool Connection -> Int -> ActionT TL.Text IO ()
+  --deletePerson1 pool id = runDb pool $ \c -> do
+  --        void $ execute c [sql|DELETE FROM person WHERE id=?|] [Only id]
+  --        return ()     
+  --     where
+  --      -- runDb :: Pool Connection -> (Connection -> IO a) -> IO a
+  --      runDb pool f =
+  --        withResource pool (\conn -> withTransaction conn (f conn))
+
+
 -------------------------------------------------------------------------------
 -- Queries
 -------------------------------------------------------------------------------

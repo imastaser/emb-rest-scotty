@@ -17,7 +17,11 @@ data_method_ = makeAttribute "data-method"
 
 -- | The @data_confirm@ attribute.
 data_confirm_ :: Text -> Attribute
-data_confirm_ = makeAttribute "data-confirm"  
+data_confirm_ = makeAttribute "data-confirm" 
+
+-- | The @data_tag@ attribute.
+data_tag_ :: Text -> Attribute
+data_tag_ = makeAttribute "data-tag"  
 
 
 -- | The @aria_haspopup@ attribute.

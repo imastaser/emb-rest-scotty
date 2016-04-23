@@ -76,6 +76,7 @@ main = do
     get "/person/:id" $ do i  <- param "id"
                            [ps] <- liftIO $  findPerson pool i
                            json ps
+    
     get "/person/" $ do 
                        ps <- liftIO $  allPerson pool
                        lucidRender . renderPersons $ ps
@@ -84,25 +85,27 @@ main = do
                           ps <- liftIO $  allPerson pool 
                           html . renderText 
                             $ (renderAddPerson ps) 
-
+    -- CREATE                        
     post "/person/add" $ do person <- getPersonParam
                             [Only newId] <- lift $ insertPerson pool person 
                             -- json person
                             case person of
                               (Just p) -> lucidRender $ personRow p newId
                               Nothing -> lucidRender $ p_"error"
+    
     post "/person" $ do person <- getPersonParam
                         lift $ insertPerson pool person
                         -- status created201
                         json person     -- show info that the article was created
     
+    -- UPDATE
     put "/person" $ do  person <- getPersonParam 
                         updatePerson pool person
                         json person     
      -- DELETE
-    delete "/person/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id
+    delete "/person/:id" $ do id <- param "id" -- :: ActionM TL.Text -- get the article id
                               deletePerson pool id  -- delete the article from the DB
-                              json id      -- show info that the article was deleted
+                              json ()      -- show info that the article was deleted
 
     -- get "/testpg" $ text ( testPg)
     -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
