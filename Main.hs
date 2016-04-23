@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Entity
+import Views
 import Web.Scotty
 import Web.Scotty.Internal.Types 
 
@@ -67,6 +68,7 @@ main = do
     middleware $ staticPolicy (noDots >-> addBase "content")
 
     get  "/" $ do lucidRender  renderHomePage
+    get "/about" $ do lucidRender renderAbout
     get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
@@ -81,7 +83,7 @@ main = do
     get  "/person/add" $ do
                           ps <- liftIO $  allPerson pool 
                           html . renderText 
-                            $ (renderAddPerson <> renderPersons ps)
+                            $ (renderAddPerson ps) 
 
     post "/person/add" $ do person <- getPersonParam
                             [Only newId] <- lift $ insertPerson pool person 

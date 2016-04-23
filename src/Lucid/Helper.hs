@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ExtendedDefaultRules #-}
+
 --{-# LANGUAGE  FlexibleContexts #-}
 
 
@@ -9,11 +11,61 @@ import Lucid.Bootstrap
 import Lucid.Validation
 import Data.Text.Internal (Text)
 import Data.Monoid ((<>))
+import Data.Text (unpack, pack, append)
 import Data.String
 import Lucid.Customs
 
 metas :: Html()
 metas = meta_ []
+
+
+css :: Text -> Html ()
+css name = link_ [rel_ "stylesheet", type_ "text/css", href_ name]
+
+js :: Text -> Html ()
+js script = (script_ [src_ script] "")
+
+jquery :: Html ()
+jquery = do (js "/scripts/jquery/jquery-1.10.2.js")
+            (js "/scripts/jquery/jquery-ui.js")
+            (js "/scripts/jquery/jquery.to.json.js")
+            (js "/scripts/jquery/jquery.validate.js")
+            (js "/scripts/jquery/jquery.validate.unobtrusive.js")
+            (js "/scripts/bootstrap.min.js")
+
+commonjs :: Html ()
+commonjs = do (js "/scripts/common/ajax.js")
+              (js "/scripts/common/extensions.js")
+              (js "/scripts/common/helpers.js")
+              (js "/scripts/common/validation.extension.js")
+         
+
+personjs :: Html ()
+personjs = js "/scripts/entity/person.js"
+
+allCSS :: Html ()
+allCSS = do (css "/css/styles.css")
+            (css "/css/bootstrap.css")
+            (css "http://fonts.googleapis.com/css?family=Karla:400,700,400italic,700italic")
+
+allJS :: Html ()
+allJS = do jquery
+           commonjs
+
+
+renderPage :: Html () -> Html () -> Html () -> Html ()
+renderPage styles scripts body = 
+      doctype_ <> html_
+      (do head_ 
+        $ do
+            (allCSS <> styles)
+            body_ $ do
+              nav_ [class_ "navbar navbar-static-top"] navBar 
+              div_ [class_ "clear"] ""
+              div_ [class_ "container"] body
+              (allJS <> scripts)
+       )
+
 
 
 dropDownMenu :: Text -> Text -> [Menu] -> Html ()
@@ -60,13 +112,13 @@ type Url = Text
 data Menu = Menu Text Url | DropDown Text [Menu] | SubMenu Text [Menu]
 
 siteMenu :: [Menu]
-siteMenu = [  Menu "Home" "/"
-            , DropDown "Person" 
-                        [ Menu "All" "/person"
-                        , Menu "Add" "/person/add"
-                        , SubMenu "Menu" [Menu "Item1" "/", Menu "Item2" "/"]
+siteMenu = [  Menu "Գլխավոր" "/"
+            , DropDown "Հաճախորդնետ" 
+                        [ Menu "Բոլորը" "/person"
+                        , Menu "Ավելացնել" "/person/add"
+                        -- , SubMenu "Menu" [Menu "Item1" "/", Menu "Item2" "/"]
                         ]
-            , Menu "About" "/about"
+            , Menu "Մասին" "/about"
            ]
 
 --page1 =

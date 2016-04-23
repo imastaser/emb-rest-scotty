@@ -9,7 +9,15 @@ data_toggle_ = makeAttribute "data-toggle"
 
 -- | The @data_toggle@ attribute.
 data_target_ :: Text -> Attribute
-data_target_ = makeAttribute "data-target"  
+data_target_ = makeAttribute "data-target"
+
+-- | The @data_method@ attribute.
+data_method_ :: Text -> Attribute
+data_method_ = makeAttribute "data-method"  
+
+-- | The @data_confirm@ attribute.
+data_confirm_ :: Text -> Attribute
+data_confirm_ = makeAttribute "data-confirm"  
 
 
 -- | The @aria_haspopup@ attribute.

@@ -42,26 +42,34 @@ var PersonEntity = {
             showPreloader: false,
             preloaderSelector: "",
             success: function (response) {
-                
-        $('#ps').append(response);
-        $('#p_1').fadeIn('slow');
-
-                console.log(response);
-
+                //response.prependTo('#ps');      
+                $('#ps').prepend(response);
+                $('#p_1').fadeIn('slow');
+                PersonEntity.Reset()
+                //console.log(response);
             },
-            error: function (response) {
-                //Preloader.hide();
-                console.log(response.Message);
+            error: function (err) {
+               console.log(err);
+               alert(err);     
             }
         });
+    },
+
+    Reset: function (){
+        $('#firstname').focus();
+        $('#firstname').val('');
+        $('#lastname').val('');
+        $('#email').val('');
     }
 };
 
 // $(function(){
-// });
+// });PersonEntity
 
 jQuery(document).ready(
     function () {
-    $("#addBtn").on("click", PersonEntity.Add);    
+
+    $("#addBtn").on("click", PersonEntity.Add);
+    $('#firstname').focus();    
 });
 
