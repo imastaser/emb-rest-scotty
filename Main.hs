@@ -2,14 +2,15 @@
 
 import Entity.Person
 import Entity.User
-import Views
-import Rendering
 
-import Init.Config ( parseArgConfig)
+import Views.About
+import Views.Person
+
+import Init.Config (parseArgConfig)
 import Init.Types
 
 import DB.PostgreSQL (parseConfig, mkPool)
-import Migrate.PostgreSQL (migrate1, mkDB)
+import DB.Migrate (migrate, mkDB)
 
 import Web.Scotty
 import Web.Scotty.Internal.Types 
@@ -64,7 +65,7 @@ main = do
                        -- , destination = RequestLogger.Logger $ loggerSet $ appLogger foundation  
                        }  
     pool <- mkPool  cfg 
-    migrate1 pool
+    migrate pool
     scotty (port argCfg) $ do
     
     middleware  logger -- logO 

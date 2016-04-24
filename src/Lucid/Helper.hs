@@ -53,6 +53,7 @@ allJS = do jquery
            commonjs
 
 
+-- | The @renderPage@ make html layout.
 renderPage :: Html () -> Html () -> Html () -> Html ()
 renderPage styles scripts body = 
       doctype_ <> html_
@@ -83,11 +84,13 @@ dropDownMenu menuStyle name items =
                   , aria_expanded_ "true"
                  ]
 
+-- | The @mkMenu_@ function.
 mkMenu_ :: Menu -> Html()
 mkMenu_ (Menu txt url) = with li_ [] $ a_ [href_ url] (toHtml txt)
 mkMenu_ (DropDown name ms) = dropDownMenu "dropdown" name ms
 mkMenu_ (SubMenu name ms) = dropDownMenu "dropdown-submenu" name ms
 
+-- | The @navBar@ html element.
 navBar :: Html()
 navBar = 
   with container_ [] $ do
@@ -108,9 +111,13 @@ navBar =
               --(mapM_ (li_ . (a_ [href_ "#"]))  ["Home", "Menu"]))
               -- (dropDownMenu "Main" ["Item1", "item2"])
 
+-- | The @Url@ type.
 type Url = Text
+
+-- | The @Menu@ recursive data.
 data Menu = Menu Text Url | DropDown Text [Menu] | SubMenu Text [Menu]
 
+-- | The @siteMenu@ structure.
 siteMenu :: [Menu]
 siteMenu = [  Menu "Գլխավոր" "/"
             , DropDown "Հաճախորդներ" 
@@ -132,6 +139,7 @@ siteMenu = [  Menu "Գլխավոր" "/"
 --                      ul_ (mapM_ (li_ . toHtml . show)
 --                                 [1,2,3])))
 
+-- | The @field@ form element.
 field :: Text -> Text -> Text -> Text -> Text -> Text -> [Attribute] -> Html ()
 field  inputType helpText defVal labelName name placeholder attrs =
   fieldset_ $ do label_ (toHtml labelName)
@@ -144,9 +152,11 @@ field  inputType helpText defVal labelName name placeholder attrs =
                        ]<> attrs)
                  span_ (toHtml helpText)
 
+-- | The @textBox@ element.
 textBox :: Text -> Text -> Text -> [Attribute] -> Html ()
 textBox = field "text" "" "" 
 
+-- | The @textArea@ element.
 textArea :: Text -> Text -> [Attribute] -> Html ()
 textArea labelName name attrs = 
         fieldset_ $ do label_ (toHtml labelName)
@@ -155,7 +165,7 @@ textArea labelName name attrs =
                                    , class_ "form-control"
                                    ]<> attrs) ""
 
-
+-- | The @reqAttr@ attribute.
 reqAttr :: [Attribute]
 reqAttr = [ data_val_  "true"
           , data_val_required_ "is required"]

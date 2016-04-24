@@ -1,43 +1,91 @@
-{-# LANGUAGE OverloadedStrings, FlexibleContexts, QuasiQuotes  #-}
-module DB.Migrate where
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+-- Non type-variable argument in the constraint: 
+-- FromRow (Only b)  (Use FlexibleContexts to permit this)
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 
-import Control.Applicative
-import Control.Monad
 
-import qualified Data.ByteString.Char8 as C8
+
+module DB.Migrate (migrate, mkDB) where
+
+import Init.Types
+
 import Data.Pool
 import Data.Maybe
-import Data.Monoid (mconcat)
+import Control.Monad (void, unless, when, forM_)
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.SqlQQ
+import Database.PostgreSQL.Simple.Types
 
-{--import Web.Scotty
+import Database.PostgreSQL.Simple.FromRow
+import Database.PostgreSQL.Simple.ToRow
+import Database.PostgreSQL.Simple.ToField
+import Data.String(fromString)
 
-go :: Int -> String -> IO ()
-go port db =
-  mkPool db >>= \pool -> migrate pool  >> (scotty port $ route pool)
+import qualified Data.Text as T
 
-route :: Pool Connection -> ScottyM ()
-route pool = do
-  post "/build/:library/:version" $ do
-    library <- param "library"
-    version <- param "version"
-    x <- runDb pool $ \c -> do
-      error "todo"
-    html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
+
+-- void $ execute_  c createDBQ  -- (Only "embroidery_development" :: Only String)
+mkDB :: DbConfig -> IO ()
+mkDB cfg  = do 
+    conn <- connect defaultConnectInfo
+                       { 
+                         connectUser     = T.unpack $ dbUser cfg
+                       , connectPassword = T.unpack $ dbPassword cfg
+                       }
+    xs :: [Report] <- query conn 
+                      [sql| SELECT datname FROM pg_database 
+                            WHERE datname = ? 
+                      |] (Only (dbName cfg))
+    when (null $ xs) $ do 
+        void $ execute_ conn (
+          fromString $
+                    "CREATE DATABASE " ++ (T.unpack $ dbName cfg) ++
+                    " WITH OWNER = postgres   \
+                    \  ENCODING = 'UTF8'      \
+                    \ TABLESPACE = pg_default \
+                    \ CONNECTION LIMIT = -1;"
+                  )
+
+        -- createDBQ (Only (dbName cfg))
+   
+{--mkDB pool = withResource pool createDB
+               where createDB conn = execute_  conn createDBQ
 --}
+       
+
+
 migrate :: Pool Connection -> IO ()
-migrate pool = runDb pool $ \c -> do
-  void $  execute_ c [sql|CREATE TABLE IF NOT EXISTS migration_info (migration INT PRIMARY KEY)|]
-  forM_ migrations (runMigration c)
+migrate pool = do 
+ -- void $ mkDB pool
+ runDb pool $ \c -> do
+    void $ execute_ c bootstrapQ
+    forM_ migrations (runMigration c)
 
 runMigration :: Connection -> (Int, Query) -> IO ()
 runMigration c (v, q) = do
-  e <- exists c [sql| SELECT TRUE FROM migration_info WHERE migration = ? |] (Only v)
+  e <- exists c [sql| SELECT TRUE FROM schema_migration WHERE migration = ? |] (Only v)
   unless e $ do
-     void $ execute c [sql| INSERT INTO migration_info (migration) VALUES (?) |] (Only v)
+     void $ execute c [sql| INSERT INTO schema_migration (migration) VALUES (?) |] (Only v)
      void $ execute_ c q
+
+
+migrations :: [(Int, Query)]
+migrations = [
+    (1, personQ)
+  , (2, productQ)
+  ]
+
+runDb :: Pool Connection -> (Connection -> IO a) -> IO a
+runDb pool f =
+  withResource pool (\conn -> withTransaction conn (f conn))
+
+exists :: (ToRow a) => Connection -> Query -> a ->  IO Bool
+exists c q v =
+  isJust <$> (fetch' c q v :: IO (Maybe Bool))
+
 
 list :: (ToRow a, FromRow b) => Connection -> Query -> a ->  IO [b]
 list c q v = query c q v
@@ -50,57 +98,125 @@ fetch' :: (ToRow a, FromRow (Only b)) => Connection -> Query -> a ->  IO (Maybe 
 fetch' c q v =
   fmap (fmap fromOnly) $ fetch c q v
 
-exists :: (ToRow a) => Connection -> Query -> a ->  IO Bool
-exists c q v =
-  isJust <$> (fetch' c q v :: IO (Maybe Bool))
+-- getMigrations :: Connection -> IO [ChangeHistory]
+getMigrations :: forall r. FromRow r => Connection -> IO [r]
+getMigrations conn = query_ conn migrationsQ
 
-runDb :: Pool Connection -> (Connection -> IO a) -> IO a
-runDb pool f =
-  withResource pool (\conn -> withTransaction conn (f conn))
-
-{--mkPool :: String -> IO (Pool Connection)
-mkPool cfg =
-  createPool (connectPostgreSQL . C8.pack $ cfg) close 1 20 10
-  --}
-
-
-migrations :: [(Int, Query)]
-migrations = [
-    (1, "CREATE TABLE library (id integer NOT NULL PRIMARY KEY, name character varying NOT NULL)")
-  , (2, "CREATE TABLE build_number (id integer NOT NULL PRIMARY KEY, library integer NOT NULL, version character varying NOT NULL, build integer NOT NULL default -1)")
-  ]
-
-
-  -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Queries
 -------------------------------------------------------------------------------
 
- -- [sql|CREATE TABLE IF NOT EXISTS migration_info (migration INT PRIMARY KEY)|]
 bootstrapQ :: Query
 bootstrapQ = [sql|
 CREATE TABLE IF NOT EXISTS schema_migration (
     id              serial      NOT NULL,
-    name            text        NOT NULL,
-    description     text,
+    migration       int         NOT NULL,
     time            timestamptz NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id),
-    UNIQUE (name)
+    UNIQUE (migration)
 );
 |]
 
 
--- getMigrations :: Connection -> IO [ChangeHistory]
-getMigrations conn = query_ conn migrationsQ
+personQ :: Query
+personQ = [sql|
+CREATE TABLE IF NOT EXISTS person (
+    id              serial      NOT NULL,
+    firstName       character varying(32) NOT NULL,
+    lastName        character varying(64) NULL,
+    phone           character varying(32) NOT NULL,
+    phone2          character varying(32) NULL,
+    email           character varying(32) NULL,
+    note            text        NULL,
+    time            timestamptz NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id)
+);
+|]
+
+productQ :: Query
+productQ = [sql|
+CREATE TABLE IF NOT EXISTS product (
+    id              serial NOT NULL,
+    person_id       serial NOT NULL,
+    name            character varying(64)   NOT NULL,
+    price           numeric(12,2)   NULL,
+    time            timestamptz NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id)
+);
+|]
+
+-- numeric(15,2)
+changeColumnType :: Query
+changeColumnType = "ALTER TABLE person ALTER COLUMN firstname TYPE character varying(32)"
 
 migrationsQ :: Query
 migrationsQ =
   "SELECT id, name, description, time FROM schema_migration ORDER BY id;"
 
+data Report = Report { datname :: T.Text} deriving (Show)
 
-runMigration1 :: Connection -> (Int, Query) -> IO ()
-runMigration1 c (v, q) = do
-  e <- exists c [sql| SELECT TRUE FROM migration_info WHERE migration = ? |] (Only v)
-  unless e $ do
-     void $ execute c [sql| INSERT INTO migration_info (migration) VALUES (?) |] (Only v)
-     void $ execute_ c q
+instance FromRow Report where
+  fromRow = Report <$> field 
+
+instance ToRow Report where
+  toRow d = [toField (datname d)]
+
+instance ToField Report where
+  toField d = toField (datname d)   
+
+hello :: (ToField Report, FromRow Report) => String ->  IO [Report]
+hello dbname = do
+  pool <- createPool (connect defaultConnectInfo
+                       { 
+                         connectUser     = "postgres"
+                       , connectPassword = "Welcome*99"
+                       }) close 1 40 10
+  -- [Only k] :: [Only Int]
+  -- xs <- withResource pool $
+  conn <- connect defaultConnectInfo
+                       { 
+                         connectUser     = "postgres"
+                       , connectPassword = "Welcome*99"
+                       }
+
+ -- execute_ conn ((fromString ("CREATE DATABASE " ++ "dbname")) :: Query)                    
+  
+  _ <- execute_ conn (
+          fromString $
+                        "CREATE DATABASE " ++ dbname ++
+                        " WITH OWNER = postgres \
+                        \ TABLESPACE = pg_default \
+                        \ CONNECTION LIMIT = -1;"
+                      )
+
+  query conn [sql| SELECT datname FROM pg_database 
+                    WHERE datname = ? 
+                  |] (Only "test" :: Only T.Text)
+
+                                    
+  -- query_ conn  ifdbExistsQ 
+  --xs <- query_ conn ifdbExistsQ
+  --forM_ xs $ \(name) ->
+   -- putStrLn  name 
+  -- runDb pool $ \conn -> do
+  -- void $ execute_ 
+  -- [Only i] <- query_ conn "select 2 + 2"
+  --return xs
+  
+{--
+mkDB pool = do 
+      [Only i] :: [Only Int] <- withResource pool ka 
+      unless (i == 0) $ do 
+        void $ withResource pool createDB
+  where
+   createDB conn = execute_  conn createDBQ'
+
+ka conn       = query_ conn  ifdbExistsQ
+
+
+--}
+
+

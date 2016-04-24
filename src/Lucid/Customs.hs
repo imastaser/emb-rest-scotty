@@ -1,4 +1,6 @@
- module Lucid.Customs where
+-- |- Custom html attributes and tags. 
+
+module Lucid.Customs where
 
 import Lucid.Base
 import Data.Text (Text)

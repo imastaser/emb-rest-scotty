@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
 
-module Rendering where
+module Views.Person where
 
 import Control.Monad (foldM, mapM_)
 import Data.Text.Internal (Text)

@@ -4,3 +4,4 @@ module DB ( module DB.Dao
           ) where
 
 -- import DB.Dao as X
+Db.Dao
