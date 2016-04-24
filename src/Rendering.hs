@@ -27,9 +27,12 @@ renderAddPerson ps =
         h2_ "Ավելացնել Հաճախորդ"
         br_ []        
         form_ [id_ "personForm", method_ "post"] $ do
-          textBox "Անուն" "firstname" "" reqAttr 
-          textBox "Ազգանուն" "lastname"  "" [] 
-          textBox "էլ-փոստ" "email"  "" []
+          textBox  "Անուն" "firstname" "" reqAttr 
+          textBox  "Ազգանուն" "lastname"  "" [] 
+          textBox  "էլ-փոստ" "email"  "" []
+          textBox  "բջջայիններ" "phone"  "" (reqAttr <> [style_ "display:inline;"])
+          textBox  "" "phone2"  "" [style_ "display:inline;"]
+          textArea "նշում" "note"  []
           br_ []
           input_ [type_ "button", id_ "addBtn", class_ "btn btn-default", value_ "Ավելացնել"]
         br_ []
@@ -55,6 +58,9 @@ personsContent ps =
             th_ "Անուն"
             th_ "Ազգանուն"
             th_ "email" 
+            th_ "Բջջային"
+            th_ "Բջջային"
+            th_ "նշում" 
         tbody_ $ do
            mapM_ (\p -> personRow p (personId p)) ps
       --with form_ [method_ "post", action_ "/", enctype_ "application/json"] $ do
@@ -65,9 +71,12 @@ personsContent ps =
 personRow :: Person -> Int64 -> Html()
 personRow p id = 
   tr_ [id_ newId] $ do
-    td_ (toHtml $ personName p)
-    td_ (toHtml $ personLastName p)
-    td_ (toHtml $ personEmail p)
+    td_ (toHtml $ firstName p)
+    td_ (toHtml $ lastName p)
+    td_ (toHtml $ email p)
+    td_ (toHtml $ phone p)
+    td_ (toHtml $ phone2 p)
+    td_ (toHtml $ note p)
     td_ (a_ [ class_ "rest-edit btn btn-default"
             , href_ editUrl
             , data_method_ "put"

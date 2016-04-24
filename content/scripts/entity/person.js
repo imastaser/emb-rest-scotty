@@ -14,6 +14,9 @@ var PersonEntity = {
         data["firstname"] = $("#firstname").val();
         data["lastname"]  = $("#lastname").val();
         data["email"]     = $("#email").val();
+        data["phone"]     = $("#phone").val();
+        data["phone2"]     = $("#phone2").val();
+        data["note"]     = $("#note").val();
         
         return JSON.stringify(data);
     },
@@ -73,6 +76,9 @@ var PersonEntity = {
         $('#firstname').val('');
         $('#lastname').val('');
         $('#email').val('');
+        $('#phone').val('');
+        $('#phone2').val('');
+        $('#note').val('');
     },
 
     initDelete: function(elem) {

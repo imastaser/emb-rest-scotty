@@ -39,9 +39,12 @@ import GHC.Int(Int64)
 
 data Person = Person 
               {  personId       :: Int64
-               , personName     :: TL.Text
-               , personLastName :: TL.Text
-               , personEmail    :: TL.Text
+               , firstName     :: TL.Text
+               , lastName :: TL.Text
+               , email    :: TL.Text
+               , phone    :: TL.Text
+               , phone2   :: TL.Text
+               , note   :: TL.Text
               } 
               deriving (Show)
 
@@ -54,20 +57,29 @@ instance FromRow Person where
                    <*> field
                    <*> field
                    <*> field
+                   <*> field
+                   <*> field
+                   <*> field
 instance ToRow Person where
   toRow person =
-    [ toField (personName person)
-    , toField (personLastName person)
-    , toField (personEmail person)
+    [ toField (firstName person)
+    , toField (lastName person)
+    , toField (email  person)
+    , toField (phone  person)
+    , toField (phone2 person)
+    , toField (note person)
     ]
 
 instance FromJSON Person where
   parseJSON (Object v) = 
     Person <$>
-            v .:? "id" .!= 0  <*> -- the field "id" is optional
-            v .:  "firstname" <*>
-            v .:  "lastname"  <*>
-            v .:  "email"    
+            v .:?  "id" .!= 0  <*> -- the field "id" is optional
+            v .:   "firstname" <*>
+            v .:   "lastname"  <*>
+            v .:   "email"     <*>
+            v .:   "phone"     <*>
+            v .:   "phone2"    <*>
+            v .:   "note"     
 
 instance FromRow PersonId where
     fromRow = field
@@ -83,11 +95,14 @@ instance FromRow Int64 where
 
 
 instance ToJSON Person where
-     toJSON (Person id firstName lastName email) =
+     toJSON (Person id firstName lastName email phone phone2 note) =
          object ["id" .= id,
                  "firstName" .= firstName,
                  "lastName" .= lastName,
-                 "email"  .= email]   
+                 "email"  .= email,
+                 "phone"  .= phone,
+                 "phone2"  .= phone2,
+                 "note"  .= note]   
 
 
 insertPerson :: Pool Connection -> Maybe Person -> IO [Only Int64]
@@ -108,9 +123,9 @@ allPerson pool = do
 
 updatePerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO ()
 updatePerson _ Nothing = return ()
-updatePerson pool (Just (Person id firstname lastname email)) = do
+updatePerson pool (Just (Person id firstname lastname email phone phone2 note)) = do
      _ <- liftIO $ execSqlT pool 
-                       [firstname, lastname, email, (TL.decodeUtf8 $ BL.pack $ show id)]
+                       [firstname, lastname, email, phone, phone2, note, (TL.decodeUtf8 $ BL.pack $ show id)]
                        updatePersonQ
      return ()     
 
@@ -135,27 +150,27 @@ deletePerson pool id = do
 -------------------------------------------------------------------------------
 allPersonQ :: Query
 allPersonQ = [sql|
-              SELECT id,firstname, lastname, email 
+              SELECT id,firstname, lastname, email, phone, phone2, note 
               FROM person |]
 
 
 insertPersonQ :: Query
 insertPersonQ = [sql|
                  INSERT INTO person
-                 (firstName, lastName, email)
-                 VALUES(?,?,?) RETURNING id|]
+                 (firstName, lastName, email, phone, phone2, note)
+                 VALUES(?,?,?,?,?,?) RETURNING id|]
 
 updatePersonQ :: Query
 updatePersonQ = [sql|
                  UPDATE person 
-                 SET firstname=?, lastname=?, email=?
+                 SET firstname=?, lastname=?, email=?, phone=?, phone2=?, note=?
                  WHERE id=?
                 |]
 
 
 getPersonQ :: Query
 getPersonQ = [sql|
-              SELECT id,firstname, lastname, email 
+              SELECT id,firstname, lastname, email, phone, phone2, note
               FROM person 
               WHERE id = ? |]
 

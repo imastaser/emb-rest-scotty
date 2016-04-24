@@ -18,4 +18,4 @@ renderAbout =
       span10_ $ do
         h2_ "About"
         br_ []        
-        p_ "LiloArt 2007 "
+        p_ "LiloArt © 2007 "

@@ -123,9 +123,12 @@ personQ :: Query
 personQ = [sql|
 CREATE TABLE IF NOT EXISTS person (
     id              serial      NOT NULL,
-    firstName       text        NOT NULL,
-    lastName        text        NULL,
-    email           text        NULL,
+    firstName       character varying(32) NOT NULL,
+    lastName        character varying(64) NULL,
+    phone           character varying(32) NOT NULL,
+    phone2          character varying(32) NULL,
+    email           character varying(32) NULL,
+    note            text        NULL,
     time            timestamptz NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
@@ -137,14 +140,17 @@ productQ = [sql|
 CREATE TABLE IF NOT EXISTS product (
     id              serial NOT NULL,
     person_id       serial NOT NULL,
-    name            text   NOT NULL,
-    price           text   NULL,
+    name            character varying(64)   NOT NULL,
+    price           numeric(12,2)   NULL,
     time            timestamptz NOT NULL DEFAULT now(),
 
     PRIMARY KEY (id)
 );
 |]
 
+-- numeric(15,2)
+changeColumnType :: Query
+changeColumnType = "ALTER TABLE person ALTER COLUMN firstname TYPE character varying(32)"
 
 migrationsQ :: Query
 migrationsQ =

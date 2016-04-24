@@ -147,6 +147,14 @@ field  inputType helpText defVal labelName name placeholder attrs =
 textBox :: Text -> Text -> Text -> [Attribute] -> Html ()
 textBox = field "text" "" "" 
 
+textArea :: Text -> Text -> [Attribute] -> Html ()
+textArea labelName name attrs = 
+        fieldset_ $ do label_ (toHtml labelName)
+                       textarea_ ([ name_ name
+                                   , id_  name
+                                   , class_ "form-control"
+                                   ]<> attrs) ""
+
 
 reqAttr :: [Attribute]
 reqAttr = [ data_val_  "true"
