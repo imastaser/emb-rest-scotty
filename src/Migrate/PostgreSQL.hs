@@ -9,7 +9,7 @@
 
 module Migrate.PostgreSQL (migrate1, mkDB) where
 
-import Emb.Types
+import Init.Types
 
 import Data.Pool
 import Data.Maybe

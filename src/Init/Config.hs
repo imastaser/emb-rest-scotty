@@ -4,7 +4,7 @@ module Init.Config
     ( parseArgConfig
     ) where
 
-import Emb.Types
+import Init.Types
 import qualified Data.Text as T
 import System.Environment (getArgs, getProgName, getEnvironment)
 import Data.Yaml
@@ -62,5 +62,8 @@ parseArgConfig = do
 
 
 
+--readYamlFile :: FilePath -> IO Node
+--readYamlFile f =
+--  (maybe (error $ "Could not parse " ++ f) id) `fmap` decodeFile f
    
 

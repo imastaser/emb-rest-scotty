@@ -7,7 +7,7 @@ import Control.Monad (foldM, mapM_)
 import Data.Text.Internal (Text)
 import Data.Text (unpack, pack, append)
 import Data.Monoid ((<>))
-import Entity
+import Entity.Person
 import Lucid
 import Lucid.Bootstrap
 import Lucid.Validation

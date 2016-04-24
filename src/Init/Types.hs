@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-module Emb.Types where
+module Init.Types where
 
 import qualified Data.Text  as T    
 

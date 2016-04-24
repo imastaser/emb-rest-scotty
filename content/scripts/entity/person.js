@@ -95,6 +95,7 @@ var PersonEntity = {
                     console.log(data);
                     var item = '#p_'+ id;
                     $(item).fadeOut('slow');
+                    $('#ps').children('tr:first').fadeIn('slow');
                     $(item).hide();
                 },
                 error: function(data) {

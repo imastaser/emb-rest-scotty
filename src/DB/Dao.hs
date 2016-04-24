@@ -1,7 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-module DB.Dao where
+module DB.Dao
+      ( execSqlT
+      , fetch1
+      , fetchSimple1)
+     where
 
 import Database.PostgreSQL.Simple
 import Data.Pool(Pool, createPool, withResource)
@@ -9,7 +13,7 @@ import Data.Pool(Pool, createPool, withResource)
 
 import GHC.Int(Int64)
 import Data.Aeson
--- import Control.Monad.IO.Class
+
 
 -------------------------------------------------------------------------------
 -- Utilities for interacting with the DB.
@@ -20,8 +24,6 @@ import Data.Aeson
 execSqlT :: ToRow q => Pool Connection -> q -> Query -> IO Int64
 execSqlT pool args sql = withResource pool ins
        where ins conn = withTransaction conn $ execute conn sql args
-
-
 
 --------------------------------------------------------------------------------
 -- Utilities for interacting with the DB.

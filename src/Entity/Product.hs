@@ -2,7 +2,7 @@
 
 -- | The product entity.
 
-module Emb.Entity.Product
+module Entity.Product
        (Product(..))
        where
 

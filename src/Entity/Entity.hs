@@ -1,10 +1,10 @@
 -- | Top-level module. Re-exports things from all other modules.
 
-module Entity (module X
+module Entity ( module X
   , module Person) where
 
 import Emb.Entity.User as X
-import Emb.Types       as X
+import Init.Types       as X
 import DB.PostgreSQL   as X
 import DB.Migrate      as X
 -- import DB.Core         as X 

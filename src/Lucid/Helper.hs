@@ -113,7 +113,7 @@ data Menu = Menu Text Url | DropDown Text [Menu] | SubMenu Text [Menu]
 
 siteMenu :: [Menu]
 siteMenu = [  Menu "Գլխավոր" "/"
-            , DropDown "Հաճախորդնետ" 
+            , DropDown "Հաճախորդներ" 
                         [ Menu "Բոլորը" "/person"
                         , Menu "Ավելացնել" "/person/add"
                         -- , SubMenu "Menu" [Menu "Item1" "/", Menu "Item2" "/"]

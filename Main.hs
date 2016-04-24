@@ -1,25 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Entity
+import Entity.Person
+import Entity.User
 import Views
+import Rendering
+
+import Init.Config ( parseArgConfig)
+import Init.Types
+
+import DB.PostgreSQL (parseConfig, mkPool)
+import Migrate.PostgreSQL (migrate1, mkDB)
+
 import Web.Scotty
 import Web.Scotty.Internal.Types 
-
-import Rendering 
-
 import qualified Data.Aeson as A
-import Emb.Entity.Newtypes (PersonId(..))
---import Data.Monoid ((<>))
---import Prelude
+
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad (foldM, mapM_)
-import qualified Data.Text.Internal.Lazy as L
+
 import Database.PostgreSQL.Simple
 import Data.Foldable(forM_)
-import qualified Data.Text.Lazy as TL
+import qualified Data.Text.Lazy          as TL
+import qualified Data.Text.Internal.Lazy as L
 import Lucid
-import Data.Monoid ((<>))
 import Network.HTTP.Types.Status ( created201
                                  , internalServerError500
                                  , notFound404)
@@ -35,8 +39,7 @@ import Network.Wai.Middleware.RequestLogger ( mkRequestLogger
                                             , OutputFormat(Detailed, Apache)
                                             , IPAddrSource(FromHeader, FromSocket))
 
-import Data.Text.Lazy (toStrict)
-
+lucidRender :: Html a -> ActionM ()
 lucidRender = html . renderText
 
 main :: IO ()
@@ -69,7 +72,6 @@ main = do
 
     get  "/" $ do lucidRender  renderHomePage
     get "/about" $ do lucidRender renderAbout
-    get "/word/:word" $ wordR "word"
     get "/users" usersR
     post "/users" $ userP (jsonData :: ActionM User)
 
@@ -78,11 +80,11 @@ main = do
                            json ps
     
     get "/person/" $ do 
-                       ps <- liftIO $  allPerson pool
+                       ps <- liftIO $  allPersons pool
                        lucidRender . renderPersons $ ps
                          
     get  "/person/add" $ do
-                          ps <- liftIO $  allPerson pool 
+                          ps <- liftIO $  allPersons pool 
                           html . renderText 
                             $ (renderAddPerson ps) 
     -- CREATE                        
@@ -94,7 +96,7 @@ main = do
                               Nothing -> lucidRender $ p_"error"
     
     post "/person" $ do person <- getPersonParam
-                        lift $ insertPerson pool person
+                        _ <- lift $ insertPerson pool person
                         -- status created201
                         json person     -- show info that the article was created
     
@@ -103,18 +105,10 @@ main = do
                         updatePerson pool person
                         json person     
      -- DELETE
-    delete "/person/:id" $ do id <- param "id" -- :: ActionM TL.Text -- get the article id
-                              deletePerson pool id  -- delete the article from the DB
+    delete "/person/:id" $ do pid <- param "id" -- :: ActionM TL.Text -- get the article id
+                              deletePerson pool pid  -- delete the article from the DB
                               json ()      -- show info that the article was deleted
 
-    -- get "/testpg" $ text ( testPg)
-    -- wordR :: Data.Text.Internal.Lazy.Text -> ActionM ()
-    -- wordR :: L.Text -> ActionM ()
-
-wordR ::L.Text -> ActionT L.Text IO ()
-wordR w = do
-    word <- param w
-    html $ mconcat ["<h1>Scotty, ", word, " me up!</h1>"]
 
 usersR :: ActionM ()
 usersR = do

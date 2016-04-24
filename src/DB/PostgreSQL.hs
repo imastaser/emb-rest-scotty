@@ -5,7 +5,7 @@
 module DB.PostgreSQL where
 
 
-import Emb.Types (DefaultEnv(..), DbConfig(..))
+import Init.Types (DefaultEnv(..), DbConfig(..))
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField (toField)  

@@ -3,7 +3,7 @@
 
 -- | Newtypes; foreign keys and such.
 
-module Emb.Entity.Newtypes
+module Entity.Newtypes
        ( PersonId(..)
        , ProductId(..)
        , OrderId(..)
