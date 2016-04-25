@@ -9,6 +9,7 @@
 
 module DB.Migrate (migrate, mkDB) where
 
+import DB.SchemeQuery
 import Init.Types
 
 import Data.Pool
@@ -76,6 +77,7 @@ migrations :: [(Int, Query)]
 migrations = [
     (1, personQ)
   , (2, productQ)
+  , (3, workTypeQ)
   ]
 
 runDb :: Pool Connection -> (Connection -> IO a) -> IO a
@@ -106,47 +108,7 @@ getMigrations conn = query_ conn migrationsQ
 -- Queries
 -------------------------------------------------------------------------------
 
-bootstrapQ :: Query
-bootstrapQ = [sql|
-CREATE TABLE IF NOT EXISTS schema_migration (
-    id              serial      NOT NULL,
-    migration       int         NOT NULL,
-    time            timestamptz NOT NULL DEFAULT now(),
 
-    PRIMARY KEY (id),
-    UNIQUE (migration)
-);
-|]
-
-
-personQ :: Query
-personQ = [sql|
-CREATE TABLE IF NOT EXISTS person (
-    id              serial      NOT NULL,
-    firstName       character varying(32) NOT NULL,
-    lastName        character varying(64) NULL,
-    phone           character varying(32) NOT NULL,
-    phone2          character varying(32) NULL,
-    email           character varying(32) NULL,
-    note            text        NULL,
-    time            timestamptz NOT NULL DEFAULT now(),
-
-    PRIMARY KEY (id)
-);
-|]
-
-productQ :: Query
-productQ = [sql|
-CREATE TABLE IF NOT EXISTS product (
-    id              serial NOT NULL,
-    person_id       serial NOT NULL,
-    name            character varying(64)   NOT NULL,
-    price           numeric(12,2)   NULL,
-    time            timestamptz NOT NULL DEFAULT now(),
-
-    PRIMARY KEY (id)
-);
-|]
 
 -- numeric(15,2)
 changeColumnType :: Query
