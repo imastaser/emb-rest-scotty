@@ -3,6 +3,7 @@
 var PersonEntity = {
     initialize: function() {
         $("#addBtn").on("click", PersonEntity.Add);
+        $("#saveBtn").on("click", PersonEntity.Save);
         $('#firstname').focus();    
         PersonEntity.initDelete($('.rest-delete'));
     },
@@ -67,6 +68,46 @@ var PersonEntity = {
             error: function (err) {
                console.log(err);
                alert(err);     
+            }
+        });
+    },
+    Save: function () {
+        
+        var form = $("#personForm");
+
+        if (!PersonEntity.Validate(form)) {
+            return;
+        }
+//debugger;
+        var url = form.attr('action');
+        var data = PersonEntity.GetData(form);
+        var actualObj = JSON.parse(data);
+        actualObj.id = form.attr('tag');
+
+       // data = JSON.stringify(actualObj);
+
+        console.log("ajax  = " + data);
+                
+        Ajax.put({
+            url: url,
+            async: true,
+            data: data,
+            lockAjax: false,
+            showFailure: false,
+            showPreloader: false,
+            preloaderSelector: "",
+            success: function (response) {
+                
+                console.log(response);
+                // similar behavior as an HTTP redirect
+                //window.location.replace("http://stackoverflow.com");
+
+                // similar behavior as clicking on a link
+               window.location.href = window.location.origin+"/person";
+            },
+            error: function (err) {
+               console.log(err);
+               //alert(err);     
             }
         });
     },

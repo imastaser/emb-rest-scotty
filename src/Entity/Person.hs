@@ -10,6 +10,7 @@ module Entity.Person
        , deletePerson
        , findPerson
        , allPersons
+       , createPerson -- for seeds
        )
        where
 
@@ -95,7 +96,11 @@ instance ToJSON Person where
 
 insertPerson :: Pool Connection -> Maybe Person -> IO [Only Int64]
 insertPerson _    Nothing = return [Only 0]
-insertPerson pool (Just person) = fetch1 pool person insertPersonQ 
+insertPerson pool (Just person) = fetch1 pool person insertQ 
+
+
+createPerson :: Pool Connection -> Person -> IO [Only Int64]
+createPerson pool person = fetch1 pool person insertQ 
 
 
 findPerson :: Pool Connection -> Int -> IO [Person]
@@ -109,12 +114,12 @@ allPersons pool = do
      return  res
 
 
-updatePerson :: Pool Connection -> Maybe Person -> ActionT TL.Text IO ()
-updatePerson _ Nothing = return ()
-updatePerson pool (Just (Person _id _firstName _lastName _email _phone _phone2 _note)) = do
+updatePerson :: Pool Connection -> Maybe Person -> Int64 -> ActionT TL.Text IO ()
+updatePerson _ Nothing _ = return ()
+updatePerson pool (Just (Person _ _firstName _lastName _email _phone _phone2 _note)) i = do
      _ <- liftIO $ execSqlT pool 
-                       [_firstName, _lastName, _email, _phone, _phone2, _note, (TL.decodeUtf8 $ BL.pack $ show _id)]
-                       updatePersonQ
+                       [_firstName, _lastName, _email, _phone, _phone2, _note, (TL.decodeUtf8 $ BL.pack $ show i)]
+                       updateQ
      return ()     
 
 
@@ -134,18 +139,19 @@ allPersonQ = [sql|
               FROM person |]
 
 
-insertPersonQ :: Query
-insertPersonQ = [sql|
-                 INSERT INTO person
-                 (firstName, lastName, email, phone, phone2, note)
-                 VALUES(?,?,?,?,?,?) RETURNING id|]
+insertQ :: Query
+insertQ = [sql|
+               INSERT INTO person
+               (firstName, lastName, email, phone, phone2, note)
+               VALUES(?,?,?,?,?,?) RETURNING id
+          |]
 
-updatePersonQ :: Query
-updatePersonQ = [sql|
-                 UPDATE person 
-                 SET firstname=?, lastname=?, email=?, phone=?, phone2=?, note=?
-                 WHERE id=?
-                |]
+updateQ :: Query
+updateQ = [sql|
+           UPDATE person 
+           SET firstname=?, lastname=?, email=?, phone=?, phone2=?, note=?
+           WHERE id=?
+          |]
 
 
 getPersonQ :: Query

@@ -25,6 +25,9 @@ data_confirm_ = makeAttribute "data-confirm"
 data_tag_ :: Text -> Attribute
 data_tag_ = makeAttribute "data-tag"  
 
+-- | The @tag@ attribute.
+tag_ :: Text -> Attribute
+tag_ = makeAttribute "tag"  
 
 -- | The @aria_haspopup@ attribute.
 aria_haspopup_ :: Text -> Attribute

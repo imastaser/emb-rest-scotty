@@ -20,6 +20,11 @@
         return process(options, "GET");
     };
 
+    Ajax.put = function (options) {
+        return process(options, "PUT");
+    };
+
+
     var redirect = false,
         progress = false;
 

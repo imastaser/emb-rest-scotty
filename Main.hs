@@ -2,6 +2,7 @@
 
 import Entity.Person
 import Entity.User
+import Entity.Product
 
 import Views.About
 import Views.Person
@@ -29,6 +30,7 @@ import Network.HTTP.Types.Status ( created201
                                  , internalServerError500
                                  , notFound404)
 
+import GHC.Int(Int64)
 
 import Data.Default (def)
 import Network.Wai.Middleware.Static
@@ -83,6 +85,7 @@ main = do
     get "/person/" $ do 
                        ps <- liftIO $  allPersons pool
                        lucidRender . renderPersons $ ps
+
                          
     get  "/person/add" $ do
                           ps <- liftIO $  allPersons pool 
@@ -102,9 +105,15 @@ main = do
                         json person     -- show info that the article was created
     
     -- UPDATE
-    put "/person" $ do  person <- getPersonParam 
-                        updatePerson pool person
-                        json person     
+    get "/person/:id/edit" $ do  i  <- param "id" 
+                                 [p] <- liftIO $  findPerson pool i
+                                 html . renderText $ (renderEditPerson i p)    
+                            
+    -- UPDATE
+    put "/person/:id" $ do  i  <- param "id" :: ActionM Int64
+                            person <- getPersonParam 
+                            _ <- updatePerson pool person i
+                            json person
      -- DELETE
     delete "/person/:id" $ do pid <- param "id" -- :: ActionM TL.Text -- get the article id
                               deletePerson pool pid  -- delete the article from the DB

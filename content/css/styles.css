@@ -5,3 +5,11 @@
 .input-validation-error {box-shadow:0 0 0 1px rgba(207, 104, 104, 0.6) !important}
 .input-validation-error:focus { border:none !important; }
 .k-icon.p-error{display:none}
+
+
+footer {
+    border-top: 1px solid #EEEEEE;
+    margin-top: 50px;
+    padding-top: 5px;
+    text-align: center;
+}

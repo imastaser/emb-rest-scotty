@@ -53,6 +53,13 @@ allJS = do jquery
            commonjs
 
 
+footer :: Html ()
+footer =
+  html_ $ do
+      footer_ $ do
+        p_ $ small_ "LiloArt © 2007 "
+
+
 -- | The @renderPage@ make html layout.
 renderPage :: Html () -> Html () -> Html () -> Html ()
 renderPage styles scripts body = 
@@ -64,6 +71,7 @@ renderPage styles scripts body =
               nav_ [class_ "navbar navbar-static-top"] navBar 
               div_ [class_ "clear"] ""
               div_ [class_ "container"] body
+              footer  
               (allJS <> scripts)
        )
 
@@ -141,7 +149,7 @@ siteMenu = [  Menu "Գլխավոր" "/"
 
 -- | The @field@ form element.
 field :: Text -> Text -> Text -> Text -> Text -> Text -> [Attribute] -> Html ()
-field  inputType helpText defVal labelName name placeholder attrs =
+field  inputType helpText labelName name defVal placeholder attrs =
   fieldset_ $ do label_ (toHtml labelName)
                  input_ ([ type_ inputType
                        , name_ name
@@ -153,8 +161,8 @@ field  inputType helpText defVal labelName name placeholder attrs =
                  span_ (toHtml helpText)
 
 -- | The @textBox@ element.
-textBox :: Text -> Text -> Text -> [Attribute] -> Html ()
-textBox = field "text" "" "" 
+textBox :: Text -> Text -> Text -> Text -> [Attribute] -> Html ()
+textBox = field "text" ""  
 
 -- | The @textArea@ element.
 textArea :: Text -> Text -> [Attribute] -> Html ()
