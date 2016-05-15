@@ -7,11 +7,17 @@ module Entity.Product
         ( Product(..)
         , personProducts
         , insertProduct
-        , allProducts)
+        , allProducts
+        , deleteProduct
+        , findProduct
+        , updateProduct)
        where
 
-import DB.Dao (fetch1, fetchSimple1)
-import Data.Pool(Pool, withResource)
+import DB.Dao (fetch1, fetchSimple1, execSqlT)
+import Data.Pool (Pool, withResource)
+import Control.Monad.IO.Class (liftIO)
+
+import Web.Scotty.Internal.Types (ActionT)
 
 import qualified Data.Text.Lazy             as TL
 import qualified Data.Text.Lazy.Encoding    as TL
@@ -104,6 +110,27 @@ allProducts pool = do
      res <- fetchSimple1 pool allProductQ :: IO [Product] 
      return  res
 
+deleteProduct :: Pool Connection -> Int -> ActionT TL.Text IO ()
+deleteProduct pool _id = do
+     _ <- liftIO $ execSqlT pool (Only _id) "DELETE FROM product WHERE id=?"
+     return ()
+
+
+findProduct :: Pool Connection -> Int -> IO [Product]
+findProduct pool id = do
+     res <- fetch1 pool (Only id) getProductQ :: IO [Product] 
+     return  res
+
+
+updateProduct :: Pool Connection -> Maybe Product -> Int64 -> ActionT TL.Text IO ()
+updateProduct _ Nothing _ = return ()
+updateProduct pool (Just (Product _ _person_id _workType_id _name _price _caxs _note)) i = do
+     _ <- liftIO $ execSqlT pool 
+                       [(TL.decodeUtf8 $ BL.pack $ show  _person_id), (TL.decodeUtf8 $ BL.pack $ show  _workType_id), _name, (TL.decodeUtf8 $ BL.pack $ show _price), (TL.decodeUtf8 $ BL.pack $ show _caxs), _note, (TL.decodeUtf8 $ BL.pack $ show i)]
+                       updateQ
+     return ()     
+
+
 -------------------------------------------------------------------------------
 -- Queries
 -------------------------------------------------------------------------------
@@ -128,7 +155,13 @@ updateQ = [sql|
 
 personProductsQ :: Query
 personProductsQ = [sql|
-                      SELECT id, workType_id, name, price, caxs, note
+                      SELECT id, person_id, workType_id, name, price, caxs, note
                       FROM product 
                       WHERE person_id = ? |]   
 
+
+getProductQ :: Query
+getProductQ = [sql|
+              SELECT id, person_id, workType_id, name, price, caxs, note
+              FROM product 
+              WHERE id = ? |]

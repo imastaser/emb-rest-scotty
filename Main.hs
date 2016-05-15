@@ -116,29 +116,53 @@ main = do
                             _ <- updatePerson pool person i
                             json person
      -- DELETE
-    delete "/person/:id" $ do pid <- param "id" -- :: ActionM TL.Text -- get the article id
-                              deletePerson pool pid  -- delete the article from the DB
-                              json ()      -- show info that the article was deleted
+    delete "/person/:id" 
+          $ do pid <- param "id" -- :: ActionM TL.Text -- get the article id
+               deletePerson pool pid  -- delete the article from the DB
+               json ()      -- show info that the article was deleted
 
 
     -- Product CRUD
-    get "/person/:id/products" $ do  pid  <- param "id" 
-                                     ps <- liftIO $  personProducts pool pid
-                                     lucidRender . renderProducts $ ps
 
-     -- CREATE  
-    get  "/person/:id/product/add" $ do
-                          pid  <- param "id"
-                          ps <- liftIO $  allProducts pool 
-                          html . renderText 
-                            $ (renderAddProduct pid ps)                      
+    -- index
+    get "/person/:id/products" 
+          $ do pid  <- param "id" 
+               ps <- liftIO $  personProducts pool pid
+               lucidRender . renderProducts $ ps
+
+     -- CREATE - Add
+    get  "/person/:id/product/add" 
+          $ do pid  <- param "id"
+               ps <- liftIO $  allProducts pool 
+               html . renderText $ (renderAddProduct pid ps)   
+
     post "/person/:id/product/add" 
           $ do product <- getProductParam
                pid  <- param "id"
                [Only newId] <- lift $ insertProduct pool product pid
                case product of
                   (Just p) -> lucidRender $ productRow p newId
-                  Nothing -> lucidRender $ p_"error"                                 
+                  Nothing -> lucidRender $ p_"error: in insert product"  
+
+    -- UPDATE - Edit
+    get "/person/:id/product/:prod_id/edit" 
+          $ do  prod_id  <- param "prod_id" 
+                [p] <- liftIO $  findProduct pool prod_id
+                html . renderText $ (renderEditProduct prod_id p)    
+                            
+    put "/person/:id/product/:prod_id" 
+          $ do  prod_id  <- param "prod_id" :: ActionM Int64
+                product <- getProductParam 
+                _ <- updateProduct pool product prod_id
+                json product
+
+
+     -- DELETE 
+    delete "/person/:id/product/:prod_id" 
+          $ do prod_id <- param "prod_id" :: ActionM Int
+               deleteProduct pool prod_id 
+               json ()      
+                                             
 
 usersR :: ActionM ()
 usersR = do

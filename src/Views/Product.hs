@@ -15,7 +15,7 @@ import Lucid.Helper
 import Lucid.Customs
 import GHC.Int(Int64)
 
-
+import qualified Data.Text.Lazy as TL
 
 renderProducts :: [Product] -> Html()
 renderProducts ps = 
@@ -83,6 +83,29 @@ productRow p id =
     newId :: T.Text
     newId = pack $ "p_" ++ show (person_Id p)
     editUrl :: T.Text
-    editUrl = pack $ "/person/" ++ show (person_Id p) ++ "/product/" ++ show id
+    editUrl = pack $ "/person/" ++ show (person_Id p) ++ "/product/" ++ show id ++ "/edit"
     deleteUrl :: T.Text
     deleteUrl = pack $ "/person/" ++ show (person_Id p) ++ "/product/" ++ show id           
+
+
+
+renderEditProduct :: Int -> Product -> Html ()
+renderEditProduct id p =
+  renderPage mempty productjs $ do
+    row_ $ 
+      span6_ $ do
+        h2_ "Xmbagrel product"
+        br_ []
+        form_ [id_ "productForm", method_ "put", action_ actionUrl, tag_ (pack $ show id)] $ do
+          numberBox  "Type" "workType_id"  (pack . show $ workType_Id p) "" reqAttr 
+          textBox  "անուն" "name"  (TL.toStrict $ productName p) "" [] 
+          numberBox  "price" "price"  (pack . show $ productPrice p) "" []
+          numberBox  "caxs" "caxs"  (pack . show $ caxs p) "" (reqAttr <> [style_ "display:inline;"])
+          textArea "նշում" "note"  []
+          br_ []
+          input_ [type_ "button", id_ "saveBtn", class_ "btn btn-default", value_ "Հիշել"]
+        br_ []
+        div_ [class_ "clear"] ""
+   where
+      actionUrl :: T.Text
+      actionUrl = pack $ "/person/" ++ show (person_Id p) ++ "/product/"++ show id

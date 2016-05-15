@@ -74,7 +74,7 @@ var ProductEntity = {
     },
     Save: function () {
         
-        var form = $("#personForm");
+        var form = $("#productForm");
 
         if (!ProductEntity.Validate(form)) {
             return;
@@ -82,8 +82,8 @@ var ProductEntity = {
 //debugger;
         var url = form.attr('action');
         var data = ProductEntity.GetData(form);
-        var actualObj = JSON.parse(data);
-        actualObj.id = form.attr('tag');
+        
+        var id = form.attr('tag');
 
        // data = JSON.stringify(actualObj);
 
@@ -104,7 +104,7 @@ var ProductEntity = {
                 //window.location.replace("http://stackoverflow.com");
 
                 // similar behavior as clicking on a link
-               window.location.href = window.location.origin+"/person";
+               window.location.href = window.location.origin+"/person/" + id + "/products/";
             },
             error: function (err) {
                console.log(err);
