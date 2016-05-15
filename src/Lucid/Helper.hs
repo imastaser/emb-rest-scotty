@@ -43,6 +43,9 @@ commonjs = do (js "/scripts/common/ajax.js")
 personjs :: Html ()
 personjs = js "/scripts/entity/person.js"
 
+productjs :: Html ()
+productjs = js "/scripts/entity/product.js"
+
 allCSS :: Html ()
 allCSS = do (css "/css/styles.css")
             (css "/css/bootstrap.css")
@@ -163,6 +166,10 @@ field  inputType helpText labelName name defVal placeholder attrs =
 -- | The @textBox@ element.
 textBox :: Text -> Text -> Text -> Text -> [Attribute] -> Html ()
 textBox = field "text" ""  
+
+-- | The @numberBox@ element.
+numberBox :: Text -> Text -> Text -> Text -> [Attribute] -> Html ()
+numberBox = field "number" ""  
 
 -- | The @textArea@ element.
 textArea :: Text -> Text -> [Attribute] -> Html ()

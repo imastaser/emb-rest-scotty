@@ -6,6 +6,7 @@ import Entity.Product
 
 import Views.About
 import Views.Person
+import Views.Product
 
 import Init.Config (parseArgConfig)
 import Init.Types
@@ -120,6 +121,25 @@ main = do
                               json ()      -- show info that the article was deleted
 
 
+    -- Product CRUD
+    get "/person/:id/products" $ do  pid  <- param "id" 
+                                     ps <- liftIO $  personProducts pool pid
+                                     lucidRender . renderProducts $ ps
+
+     -- CREATE  
+    get  "/person/:id/product/add" $ do
+                          pid  <- param "id"
+                          ps <- liftIO $  allProducts pool 
+                          html . renderText 
+                            $ (renderAddProduct pid ps)                      
+    post "/person/:id/product/add" 
+          $ do product <- getProductParam
+               pid  <- param "id"
+               [Only newId] <- lift $ insertProduct pool product pid
+               case product of
+                  (Just p) -> lucidRender $ productRow p newId
+                  Nothing -> lucidRender $ p_"error"                                 
+
 usersR :: ActionM ()
 usersR = do
     json allUsers
@@ -133,4 +153,11 @@ userP jsonUser = do
 getPersonParam :: ActionT TL.Text IO (Maybe Person)
 getPersonParam = do b <- body
                     return $ (A.decode b :: Maybe Person)
+
+
+-- Parse the request body into the Product
+getProductParam :: ActionT TL.Text IO (Maybe Product)
+getProductParam = do b <- body
+                     return $ (A.decode b :: Maybe Product)
+
 

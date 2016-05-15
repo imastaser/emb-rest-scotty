@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS product (
     person_id       serial NOT NULL,
     workType_id     serial NOT NULL,
     name            character varying(64)   NOT NULL,
-    price           numeric(12,2)   NULL,
+    price           integer   NULL,
+    caxs            integer   NULL,
     note            text NULL,  
     time            timestamptz NOT NULL DEFAULT now(),
 

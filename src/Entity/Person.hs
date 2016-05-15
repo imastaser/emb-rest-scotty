@@ -62,6 +62,7 @@ instance FromRow Person where
                    <*> field
                    <*> field
                    <*> field
+                   
 instance ToRow Person where
   toRow person =
     [ toField (firstName person)
