@@ -24,7 +24,7 @@ import GHC.Int (Int64)
 
 -- connString :: BS8.ByteString
 -- connString :: Data.ByteString.Internal.ByteString
-
+  
 connString = BS8.pack $ unwords [ "host='localhost'"
                         , " port=5432"
                         , " dbname='test'"

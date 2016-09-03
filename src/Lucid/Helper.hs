@@ -27,7 +27,7 @@ js script = (script_ [src_ script] "")
 
 jquery :: Html ()
 jquery = do (js "/scripts/jquery/jquery-1.10.2.js")
-            (js "/scripts/jquery/jquery-ui.js")
+            (js "/scripts/jquery/jquery-ui-1.10.2.js")
             (js "/scripts/jquery/jquery.to.json.js")
             (js "/scripts/jquery/jquery.validate.js")
             (js "/scripts/jquery/jquery.validate.unobtrusive.js")
@@ -40,11 +40,16 @@ commonjs = do (js "/scripts/common/ajax.js")
               (js "/scripts/common/validation.extension.js")
          
 
+
+
 personjs :: Html ()
 personjs = js "/scripts/entity/person.js"
 
 productjs :: Html ()
 productjs = js "/scripts/entity/product.js"
+
+orderjs :: Html ()
+orderjs = js "/scripts/entity/order.js"
 
 allCSS :: Html ()
 allCSS = do (css "/css/styles.css")
@@ -57,10 +62,7 @@ allJS = do jquery
 
 
 footer :: Html ()
-footer =
-  html_ $ do
-      footer_ $ do
-        p_ $ small_ "LiloArt © 2007 "
+footer = footer_ $ p_ (small_ "LiloArt © 2007 ")
 
 
 -- | The @renderPage@ make html layout.

@@ -2,7 +2,8 @@
 
 
 module DB.Dao
-      ( execSqlT
+      ( runDb
+      , execSqlT
       , fetch1
       , fetchSimple1)
      where
@@ -13,6 +14,11 @@ import Data.Pool(Pool, createPool, withResource)
 
 import GHC.Int(Int64)
 import Data.Aeson
+
+
+runDb :: Pool Connection -> (Connection -> IO a) -> IO a
+runDb pool f =
+  withResource pool (\conn -> withTransaction conn (f conn))
 
 
 -------------------------------------------------------------------------------

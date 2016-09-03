@@ -79,7 +79,6 @@ renderPersons ps =
 
 personsTable :: [Person] -> Html()
 personsTable ps = 
-    html_ $
       table_ [ id_ "ps", class_ "table table-hover"] $ do
         thead_ $
            tr_ $ do
@@ -107,6 +106,12 @@ personRow p id =
     td_ (toHtml $ note p)
     td_ (a_ [ class_ "rest-edit btn btn-default"
             , data_tag_ pid
+            , href_ orderUrl] "Պատվերներ")
+    td_ (a_ [ class_ "rest-edit btn btn-default"
+            , data_tag_ pid
+            , href_ productUrl] "Ինչք")
+    td_ (a_ [ class_ "rest-edit btn btn-default"
+            , data_tag_ pid
             , href_ editUrl] "Խմբագրել")
     td_ (a_ [ class_ "rest-delete btn btn-danger"
             , data_method_ "delete"
@@ -121,5 +126,9 @@ personRow p id =
     newId = pack $ "p_" ++ show id
     editUrl :: T.Text
     editUrl = pack $ "/person/" ++ show id ++ "/edit"
+    orderUrl :: T.Text
+    orderUrl = pack $ "/person/" ++ show id ++ "/orders"
+    productUrl :: T.Text
+    productUrl = pack $ "/person/" ++ show id ++ "/products"
     deleteUrl :: T.Text
     deleteUrl = pack $ "/person/" ++ show id

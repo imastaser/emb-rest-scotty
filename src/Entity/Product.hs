@@ -44,12 +44,14 @@ data Product = Product
                , productName       :: TL.Text
                , productPrice      :: Int64
                , caxs              :: Int64
+               , stitches          :: Int64 
                , productNote       :: TL.Text
               } 
               deriving (Show)
 
 instance FromRow Product where
   fromRow = Product <$> field
+                    <*> field
                     <*> field
                     <*> field
                     <*> field
@@ -64,6 +66,7 @@ instance ToRow Product where
     , toField (productName  product)
     , toField (productPrice  product)
     , toField (caxs  product)
+    , toField (stitches  product)
     , toField (productNote product)
     ]
 
@@ -76,16 +79,18 @@ instance FromJSON Product where
             v .:   "name"         <*>
             v .:   "price"        <*>
             v .:   "caxs"         <*>
+            v .:   "stitches"     <*>
             v .:   "note"     
 
 instance ToJSON Product where
-     toJSON (Product _id _person_id _workType_id _name _price _caxs _note) =
+     toJSON (Product _id _person_id _workType_id _name _price _caxs _stitches _note) =
          object ["id"           .= _id,
                  "person_id"    .= _person_id,
                  "workType_id"  .= _workType_id,
                  "name"         .= _name,
                  "price"        .= _price,
                  "caxs"         .= _caxs,
+                 "stitches"     .= _stitches,
                  "note"         .= _note]   
 
 
@@ -124,9 +129,9 @@ findProduct pool id = do
 
 updateProduct :: Pool Connection -> Maybe Product -> Int64 -> ActionT TL.Text IO ()
 updateProduct _ Nothing _ = return ()
-updateProduct pool (Just (Product _ _person_id _workType_id _name _price _caxs _note)) i = do
+updateProduct pool (Just (Product _ _person_id _workType_id _name _price _caxs _stitches _note)) i = do
      _ <- liftIO $ execSqlT pool 
-                       [(TL.decodeUtf8 $ BL.pack $ show  _person_id), (TL.decodeUtf8 $ BL.pack $ show  _workType_id), _name, (TL.decodeUtf8 $ BL.pack $ show _price), (TL.decodeUtf8 $ BL.pack $ show _caxs), _note, (TL.decodeUtf8 $ BL.pack $ show i)]
+                       [(TL.decodeUtf8 $ BL.pack $ show  _person_id), (TL.decodeUtf8 $ BL.pack $ show  _workType_id), _name, (TL.decodeUtf8 $ BL.pack $ show _price), (TL.decodeUtf8 $ BL.pack $ show _caxs), (TL.decodeUtf8 $ BL.pack $ show  _stitches), _note, (TL.decodeUtf8 $ BL.pack $ show i)]
                        updateQ
      return ()     
 
@@ -136,32 +141,32 @@ updateProduct pool (Just (Product _ _person_id _workType_id _name _price _caxs _
 -------------------------------------------------------------------------------
 allProductQ :: Query
 allProductQ = [sql|
-                SELECT id, person_id, workType_id, name, price, caxs, note 
+                SELECT id, person_id, workType_id, name, price, caxs, stitches, note 
                 FROM product |]
 
 insertQ :: Query
 insertQ = [sql|INSERT INTO product
-               (person_id, workType_id, name, price, caxs, note)
-               VALUES(?,?,?,?,?,?) RETURNING id|]
+               (person_id, workType_id, name, price, caxs, stitches, note)
+               VALUES(?,?,?,?,?,?,?) RETURNING id|]
 
 
 updateQ :: Query
 updateQ = [sql|
            UPDATE product 
-           SET person_id=?, workType_id=?, name=?, price=?, caxs=?, note=?
+           SET person_id=?, workType_id=?, name=?, price=?, caxs=?, stitches=?, note=?
            WHERE id=?
           |]     
 
 
 personProductsQ :: Query
 personProductsQ = [sql|
-                      SELECT id, person_id, workType_id, name, price, caxs, note
+                      SELECT id, person_id, workType_id, name, price, caxs, stitches, note
                       FROM product 
                       WHERE person_id = ? |]   
 
 
 getProductQ :: Query
 getProductQ = [sql|
-              SELECT id, person_id, workType_id, name, price, caxs, note
+              SELECT id, person_id, workType_id, name, price, caxs, stitches, note
               FROM product 
               WHERE id = ? |]

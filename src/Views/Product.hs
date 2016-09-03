@@ -45,7 +45,6 @@ renderAddProduct i ps =
 
 productsTable :: [Product] -> Html()
 productsTable ps = 
-    html_ $
       table_ [ id_ "ps", class_ "table table-hover"] $ do
         thead_ $
            tr_ $ do

@@ -10,6 +10,7 @@
 module DB.Migrate (migrate, mkDB) where
 
 import DB.SchemeQuery
+import DB.Dao(runDb)
 import Init.Types
 
 import Data.Pool
@@ -73,16 +74,17 @@ runMigration c (v, q) = do
      void $ execute_ c q
 
 
+
+
 migrations :: [(Int, Query)]
 migrations = [
     (1, personQ)
   , (2, productQ)
   , (3, workTypeQ)
+  , (4, orderCreateQ)
   ]
 
-runDb :: Pool Connection -> (Connection -> IO a) -> IO a
-runDb pool f =
-  withResource pool (\conn -> withTransaction conn (f conn))
+
 
 exists :: (ToRow a) => Connection -> Query -> a ->  IO Bool
 exists c q v =

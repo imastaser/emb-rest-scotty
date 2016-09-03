@@ -26,4 +26,6 @@ executable          emb-rest
                   , bytestring 
                   , yaml
                   , transformers
+                  , time
+               
 

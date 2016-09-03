@@ -3,17 +3,20 @@
 import Entity.Person
 import Entity.User
 import Entity.Product
+import Entity.Order
+
 
 import Views.About
 import Views.Person
 import Views.Product
+import Views.Order
 
 import Init.Config (parseArgConfig)
 import Init.Types
 
 import DB.PostgreSQL (parseConfig, mkPool)
 import DB.Migrate (migrate, mkDB)
-
+import DB.Seeds (seed)
 import Web.Scotty
 import Web.Scotty.Internal.Types 
 import qualified Data.Aeson as A
@@ -69,6 +72,7 @@ main = do
                        }  
     pool <- mkPool  cfg 
     migrate pool
+    seed pool
     scotty (port argCfg) $ do
     
     middleware  logger -- logO 
@@ -162,7 +166,30 @@ main = do
           $ do prod_id <- param "prod_id" :: ActionM Int
                deleteProduct pool prod_id 
                json ()      
-                                             
+          
+
+    -- Order CRUD
+
+    -- index
+    get "/person/:id/orders" 
+          $ do pid  <- param "id" 
+               ps <- liftIO $  personOrders pool pid
+               lucidRender . renderOrders $ ps
+
+    -- CREATE - Add
+    get  "/person/:id/order/add" 
+          $ do pid  <- param "id"
+               ps <- liftIO $  allOrders pool 
+               html . renderText $ (renderAddOrder pid ps)   
+
+    post "/person/:id/order/add" 
+          $ do order <- getOrderParam
+               pid  <- param "id"
+               [Only newId] <- lift $ insertOrder pool order pid
+               case order of
+                  (Just p) -> lucidRender $ orderRow p newId
+                  Nothing -> lucidRender $ p_"error: could not get order from json"  
+
 
 usersR :: ActionM ()
 usersR = do
@@ -183,5 +210,11 @@ getPersonParam = do b <- body
 getProductParam :: ActionT TL.Text IO (Maybe Product)
 getProductParam = do b <- body
                      return $ (A.decode b :: Maybe Product)
+
+
+-- Parse the request body into the Product
+getOrderParam :: ActionT TL.Text IO (Maybe Order)
+getOrderParam = do b <- body
+                   return $ (A.decode b :: Maybe Order)
 
 
